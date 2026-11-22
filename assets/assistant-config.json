@@ -1,0 +1,5 @@
+{
+  "_about": "Optional. To let readers send a question to an AI model, set endpoint to a World Bank-hosted service (for example an Azure Function calling mAI Factory) that accepts POST {question, facts} and returns {answer}. Never put an API key in this file: everything in the site can be read by its visitors.",
+  "endpoint": "",
+  "name": "the AI assistant"
+}
