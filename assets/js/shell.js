@@ -2,6 +2,7 @@
 // and the page title when French is chosen, and swaps logos for the dark background.
 import { PALETTES, paletteKey, themeKey, setPalette, setTheme, onColours, scoreColor, esc, ROOT } from "./core.js";
 import { t, lang, LANGS, setLang, applyStatic } from "./i18n.js";
+import { circuitBackground } from "./circuit.js";
 
 const SUN = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.3" fill="currentColor"/><path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3M5.4 5.4l1.6 1.6M17 17l1.6 1.6M5.4 18.6 7 17M17 7l1.6-1.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
 const MOON = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20.4 14.7A8.6 8.6 0 0 1 9.3 3.6a8.6 8.6 0 1 0 11.1 11.1Z" fill="currentColor"/></svg>`;
@@ -19,7 +20,7 @@ function swapLogos() {
   const dark = themeKey() === "dark";
   document.querySelectorAll("img[data-logo], .navbar-brand img, img.navbar-logo").forEach(img => {
     const src = img.getAttribute("src") || "";
-    const want = dark ? src.replace(/(pic-logo|wb-logo)\.png$/, "$1-dark.png") : src.replace(/-dark\.png$/, ".png");
+    const want = dark ? src.replace(/(pic-logo|pic-mark|wb-logo)\.png$/, "$1-dark.png") : src.replace(/-dark\.png$/, ".png");
     if (want !== src) img.setAttribute("src", want);
   });
 }
@@ -138,7 +139,7 @@ function scrollHints() {
   update();
 }
 
-if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => { translatePage(); mount(); navHeight(); scrollHints(); }); else { translatePage(); mount(); navHeight(); scrollHints(); }
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => { translatePage(); mount(); navHeight(); scrollHints(); circuitBackground(); }); else { translatePage(); mount(); navHeight(); scrollHints(); circuitBackground(); }
 window.addEventListener("resize", navHeight);
 
 // where the browser forgets the reader's choice between pages (no storage), carry colours, background and language in the links

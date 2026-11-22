@@ -139,18 +139,30 @@ export const FR = {
   "PFM reforms": "Réformes de la GFP",
   "Ongoing reforms": "Réformes en cours",
 
+  /* legend and filters of the country table */
+  "Omit": "Masquer",
+  "Omit the questions answered \"I don't know\"": "Masquer les questions avec « Je ne sais pas »",
+  "Omit the questions that are not scored": "Masquer les questions non notées",
+  "Omit the questions not asked": "Masquer les questions non posées",
+
+  /* answer tooltips on the compare grid */
+  "Loading the quote and rationale…": "Chargement de la citation et de la justification…",
+  "Click the dot to keep this open and use the links.": "Cliquez sur le point pour garder cette fenêtre ouverte et utiliser les liens.",
+  "Close": "Fermer",
+  "and {n} more": "et {n} autres",
+
   /* World Bank regions */
-  "Africa East and Southern": "Afrique de l'Est et australe",
-  "Africa West and Central": "Afrique de l'Ouest et centrale",
   "East Asia and Pacific": "Asie de l'Est et Pacifique",
   "Europe and Central Asia": "Europe et Asie centrale",
-  "Latin America and the Caribbean": "Amérique latine et Caraïbes",
-  "Middle East, North Africa, Afghanistan and Pakistan": "Moyen-Orient, Afrique du Nord, Afghanistan et Pakistan",
+  "Latin America and Caribbean": "Amérique latine et Caraïbes",
+  "Middle East and North Africa": "Moyen-Orient et Afrique du Nord",
+  "North America": "Amérique du Nord",
   "South Asia": "Asie du Sud",
+  "Sub-Saharan Africa": "Afrique subsaharienne",
   "Other": "Autre",
 
   /* ------------------------------------------------ answers, dots, grades */
-  "Lowest answer": "Réponse la plus faible",
+  "Worst answer": "Moins bonne réponse",
   "Best answer": "Meilleure réponse",
   "I don't know": "Je ne sais pas",
   "Answered, not scored": "Réponse non notée",
@@ -206,7 +218,7 @@ export const FR = {
   "Evidence grade: A strongest, D no answer": "Note des preuves : A la plus solide, D pas de réponse",
   "Whether the code found the quote word for word in its source": "Si le code a trouvé la citation mot pour mot dans sa source",
   "{a} of {b} answered": "{a} sur {b} avec réponse",
-  "No question matches. Clear the search to see them all.": "Aucune question ne correspond. Effacez la recherche pour les voir toutes.",
+  "No question matches. Clear the search and the boxes to see them all.": "Aucune question ne correspond. Effacez la recherche et décochez les cases pour les voir toutes.",
   "Options": "Options",
   "Options and their scores ({n} in total)": "Options et leurs scores ({n} au total)",
   "Quoted passage": "Passage cité",

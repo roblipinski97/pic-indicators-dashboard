@@ -73,18 +73,23 @@ try {
     `<div><dd>${C.length}</dd><dt class="with-icon">${lineIcon("map", 26)}<span>${tx("pilot countries", "pays pilotes")}</span></dt></div>` +
     `<div><dd>${pct(0.96)}</dd><dt class="with-icon">${lineIcon("trend", 26)}<span>${tx("less time and money to collect the data than by hand", "de temps et d'argent en moins pour collecter les données qu'à la main")}</span></dt></div>` +
     `<div><dd>${num(nQ.HRM)}</dd><dt class="with-icon">${sectorIcon("HRM", 26)}<span>${tx("questions on public employment (HRM)", "questions sur l'emploi public (GRH)")}</span></dt></div>` +
-    `<div><dd>${num(nQ.PFM)}</dd><dt class="with-icon">${sectorIcon("PFM", 26)}<span>${tx("questions on public finances (PFM)", "questions sur les finances publiques (GFP)")}</span></dt></div>` +
-    `<p class="hero-note">${tx("96%: one country's two questionnaires cost about USD 38 with the AI pipeline, against about 30 hours of a coder's time (USD 900).",
-      "96 % : les deux questionnaires d'un pays coûtent environ 38 USD avec le pipeline d'IA, contre environ 30 heures de travail d'un codeur (900 USD).")}</p>`;
+    `<div><dd>${num(nQ.PFM)}</dd><dt class="with-icon">${sectorIcon("PFM", 26)}<span>${tx("questions on public finances (PFM)", "questions sur les finances publiques (GFP)")}</span></dt></div>`;
   countryMenu($("jump"), meta.withData, null, v => { location.href = pageUrl("country.html", { c: v }); }, { placeholder: t("Choose…") });
   $("jump").querySelector("button").setAttribute("aria-labelledby", "jump-label");
 
   /* ------------------------------------------------------------ the map: the pilot countries, nothing else */
-  const regions = d3.groups(C, c => c.region || "Other").sort((a, b) => t(a[0]).localeCompare(t(b[0])));
+  // the seven World Bank regions, in the order of the Bank's own legends; a region without a pilot country is still listed
+  const WB7 = ["East Asia and Pacific", "Europe and Central Asia", "Latin America and Caribbean", "Middle East and North Africa",
+    "North America", "South Asia", "Sub-Saharan Africa"];
+  const inReg = r => C.filter(c => c.region === r).map(c => c.name).sort((a, b) => a.localeCompare(b));
+  const nReg = WB7.filter(r => inReg(r).length).length;
+  const word = k => (isFr() ? ["zéro", "une", "deux", "trois", "quatre", "cinq", "six", "sept"] : ["no", "one", "two", "three", "four", "five", "six", "seven"])[k];
   $("map-text").innerHTML = `<div class="map-text"><h2>${tx("{n} pilot countries", "{n} pays pilotes", { n: C.length })}</h2>
-    <p>${tx("PIC is being piloted in {n} countries across {r} World Bank regions. Click a flag to open a country's profile. Zoom in with the + button, Ctrl + scroll or two fingers.",
-      "PIC est testé dans {n} pays répartis dans {r} régions de la Banque mondiale. Cliquez sur un drapeau pour ouvrir le profil d'un pays. Zoomez avec le bouton +, Ctrl + défilement ou deux doigts.", { n: C.length, r: regions.length })}</p></div>
-    <dl class="regions">${regions.map(([r, cs]) => `<div><dt>${esc(t(r))}</dt><dd>${cs.map(c => c.name).sort((a, b) => a.localeCompare(b)).map(esc).join(", ")}</dd></div>`).join("")}</dl>`;
+    <p>${nReg === WB7.length
+      ? tx("The PIC Indicators project is being piloted in {n} countries across all seven World Bank regions.", "Le projet des indicateurs PIC est testé dans {n} pays, dans les sept régions de la Banque mondiale.", { n: C.length })
+      : tx("The PIC Indicators project is being piloted in {n} countries across {r} of the seven World Bank regions.", "Le projet des indicateurs PIC est testé dans {n} pays, dans {r} des sept régions de la Banque mondiale.", { n: C.length, r: word(nReg) })}</p>
+    <p>${tx("Click on a flag to see a country's profile. The map can be zoomed in and out as needed.", "Cliquez sur un drapeau pour voir le profil d'un pays. La carte peut être agrandie ou réduite selon les besoins.")}</p></div>
+    <dl class="regions">${WB7.map(r => `<div><dt>${esc(t(r))}</dt><dd${inReg(r).length ? "" : ' class="none"'}>${inReg(r).length ? inReg(r).map(esc).join(", ") : tx("No pilot country", "Aucun pays pilote")}</dd></div>`).join("")}</dl>`;
   document.querySelectorAll("[data-icon]").forEach(el => { el.innerHTML = lineIcon(el.dataset.icon, 34); });
   // ?map=caribbean adds the Caribbean countries, to test how the map handles many small islands
   const test = new URLSearchParams(location.search).get("map") === "caribbean" || window.PIC_MAP_TEST === "caribbean";
@@ -292,7 +297,7 @@ try {
   /* ------------------------------------------------------------ downloads: the questionnaires and each country's answers */
   const QFILES = [["HRM", "PIC HRM pilot.xlsx"], ["PFM", "PIC PFM pilot.xlsx"]];
   $("dl-q").innerHTML = QFILES.map(([s, f]) => `<li><a href="assets/downloads/${encodeURIComponent(f)}" download="${f}">${sectorIcon(s, 34)}` +
-    `<span><b>${esc(f.replace(/\.xlsx$/, ""))}</b><small>${esc(SECTORS[s].long)}. ${tx("Excel, English, French and Lao", "Excel, anglais, français et lao")}</small></span></a></li>`).join("");
+    `<b>${esc(SECTORS[s].long)}</b></a></li>`).join("");
   // one Excel file per country and questionnaire; the switch chooses the questionnaire (public employment first)
   const files = (meta.downloads || []).filter(d => d.year === year);
   const dlList = s => {
@@ -300,7 +305,7 @@ try {
       const d = files.find(x => x.iso3 === c.iso3 && x.sector === s);
       return d ? `<li><a href="data/download/${encodeURIComponent(d.file)}" download>${flagImg(c, 20)}<span>${esc(c.name)}</span></a></li>` : "";
     }).join("") +
-      `<li class="dl-all"><a href="data/download/pic_answers_${year}_${s}.csv" download>${tx("All countries in one file: {s} (CSV)", "Tous les pays dans un seul fichier : {s} (CSV)", { s: SECTORS[s].short })}</a></li>`;
+      `<li class="dl-all"><a href="data/download/pic_answers_${year}_${s}.csv" download>${tx("All countries in one file (CSV)", "Tous les pays dans un seul fichier (CSV)")}</a></li>`;
   };
   segmented($("dl-sector"), ["HRM", "PFM"].map(s => ({ value: s, html: sectorLabel(s, { h: 18 }) })), "HRM", dlList);
   dlList("HRM");

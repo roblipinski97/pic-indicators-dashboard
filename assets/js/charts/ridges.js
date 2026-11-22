@@ -15,21 +15,21 @@ function kde(values, bw = 0.085) {
 export function drawRidges(el, { rows, series, width, highlight, onClick }) {
   el.innerHTML = "";
   const W = width || el.clientWidth || 900, narrow = W < 620, paired = series.length > 1;
-  const M = { l: paired ? (narrow ? 70 : 96) : (narrow ? 110 : 190), r: 24, t: 10, b: 44 };
+  const M = { l: paired ? (narrow ? 70 : 96) : (narrow ? 110 : 190), r: 24, t: 10, b: 34 };
   // one row per area, or (paired) an area title and one row per series
   const rowH = paired ? (narrow ? 78 : 92) : (narrow ? 112 : 150);
-  const headH = paired ? 26 : 0, gap = paired ? 18 : 0;
-  const groupH = headH + (paired ? series.length : 1) * rowH + gap;
+  const headH = paired ? 26 : 0, gap = paired ? 18 : 0, axH = 26;   // axH: the score scale under every area
+  const groupH = headH + (paired ? series.length : 1) * rowH + axH + gap;
   const H = M.t + rows.length * groupH + M.b;
   const x = d3.scaleLinear().domain([0, 1]).range([M.l, W - M.r]);
   const svg = d3.select(el).append("svg").attr("width", W).attr("height", H).attr("viewBox", `0 0 ${W} ${H}`)
     .attr("role", "img").attr("aria-label", tx("Distribution of country scores by area", "Distribution des scores des pays par domaine") + (paired ? ": " + series.map(s => s.label).join(", ") : ""));
   // grid
-  [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+  const TICKS = [0, 0.25, 0.5, 0.75, 1];
+  TICKS.forEach(t => {
     svg.append("line").attr("x1", x(t)).attr("x2", x(t)).attr("y1", M.t).attr("y2", H - M.b + 6).attr("stroke", t === 0.5 ? "var(--line-3)" : "var(--line-2)").attr("stroke-dasharray", t === 0.5 ? "4 3" : null);
-    svg.append("text").attr("x", x(t)).attr("y", H - M.b + 22).attr("text-anchor", "middle").attr("font-size", 12).attr("fill", "var(--ink-3)").text(pct(t));
   });
-  svg.append("text").attr("x", (x(0) + x(1)) / 2).attr("y", H - 6).attr("text-anchor", "middle").attr("font-size", 13).attr("font-weight", 600).attr("fill", "var(--ink)").text(t("Score: points earned as a share of points possible"));
+  svg.append("text").attr("x", (x(0) + x(1)) / 2).attr("y", H - M.b + 26).attr("text-anchor", "middle").attr("font-size", 13).attr("font-weight", 600).attr("fill", "var(--ink)").text(t("Score: points earned as a share of points possible"));
 
   const fr = narrow ? 7 : 8;
   rows.forEach((r, i) => {
@@ -85,6 +85,12 @@ export function drawRidges(el, { rows, series, width, highlight, onClick }) {
       withTip(fl, tip);
       if (onClick) fl.on("click", (ev, p) => onClick(p.c));
     });
+    // the score scale under the area (under the pair when paired), so every area can be read on its own
+    const ay = top + headH + (paired ? series.length : 1) * rowH + 20;
+    const ax = g.append("g").attr("class", "ridge-axis").attr("font-size", 11).attr("fill", "var(--ink-3)");
+    ax.append("text").attr("x", M.l - 18).attr("y", ay).attr("text-anchor", "end").text(t("Score"));
+    TICKS.forEach(v => ax.append("text").attr("x", x(v)).attr("y", ay).attr("text-anchor", v === 0 ? "start" : v === 1 ? "end" : "middle")
+      .attr("stroke", "var(--panel)").attr("stroke-width", 3).attr("paint-order", "stroke").text(pct(v)));
   });
   return svg.node();
 }

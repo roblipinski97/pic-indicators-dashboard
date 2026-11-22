@@ -1,7 +1,7 @@
 // Country profile: the run, the scores by area (radar and table), and every question section by section.
 import { d3, loadMeta, loadAnswers, params, setParams, pageUrl, countryMenu, segmented, fillSelect, responsive,
   onColours, esc, pct, num, plural, flagImg, flagUrl, dotSvg, dotLegend, dotKind, gradeChip, quoteMark, GRADES,
-  answerParts, domainOf, scoreColor, htmlTips, svgButton, showError, SECTORS, lpSeries, allSeries, cssVar, sectorLabel,
+  answerParts, domainOf, scoreColor, darker, htmlTips, svgButton, showError, SECTORS, lpSeries, allSeries, cssVar, sectorLabel,
   t, tx, isFr } from "../core.js";
 import { drawRadar } from "../charts/radar.js";
 
@@ -47,6 +47,27 @@ try {
   ], sector, v => { sector = v; openState.clear(); load(); });
   let searchT;
   $("search").addEventListener("input", e => { clearTimeout(searchT); searchT = setTimeout(() => { term = e.target.value.trim().toLowerCase(); drawTable(); }, 150); });
+  // the legend of the table: the answer scale from worst to best, then "I don't know", "answered, not scored" and
+  // "not asked" one under the other, each with a tick box that leaves those questions out of the table
+  const hide = { idk: false, unscored: false, closed: false };
+  function drawLegend() {
+    const ramp = [0, 0.25, 0.5, 0.75, 1].map(v => `<i style="background:${scoreColor(v)};border-color:${darker(scoreColor(v))}"></i>`).join("");
+    $("qscale").innerHTML = `<span class="lg-lo">${t("Worst answer")}</span><span class="dot-ramp">${ramp}</span><span class="lg-hi">${t("Best answer")}</span>`;
+    const row = (k, dot, label, aria) => `<label class="omit-row">${dot}<span>${label}</span><input type="checkbox" data-k="${k}"${hide[k] ? " checked" : ""} aria-label="${esc(aria)}"></label>`;
+    $("qomit").innerHTML = `<span></span><span></span><span class="omit-h">${t("Omit")}</span>` +
+      row("idk", dotSvg({ st: "idk" }, null, 14), t("I don't know"), t("Omit the questions answered \"I don't know\"")) +
+      row("unscored", dotSvg({ st: "answered" }, { points: 0 }, 14), t("Answered, not scored"), t("Omit the questions that are not scored")) +
+      row("closed", dotSvg({ st: "closed" }, null, 14), t("Not asked"), t("Omit the questions not asked"));
+  }
+  $("qomit").addEventListener("change", e => { const k = e.target.dataset.k; if (!k) return; hide[k] = e.target.checked; if (data) drawTable(); });
+  // open or close every section and subsection
+  const setAll = on => {
+    const st = meta.structure[sector];
+    st.sections.forEach(sec => { openState.set("s:" + sec.id, on); sec.subsections.forEach(sub => openState.set("u:" + sub.id, on)); });
+    if (data) drawTable();
+  };
+  $("q-open").addEventListener("click", () => setAll(true));
+  $("q-close").addEventListener("click", () => setAll(false));
 
   async function load() {
     const c = meta.byIso.get(iso);
@@ -103,6 +124,9 @@ try {
   /* ------------------------------------------------------------ the questions */
   const codesOf = a => [...String(a || "").matchAll(/(?:^|\n)\s*(\d{1,3})\s*:/g)].map(m => +m[1]);
   function passes(q, a) {
+    if (hide.idk && a && a.st === "idk") return false;
+    if (hide.unscored && !(q.points > 0)) return false;
+    if (hide.closed && a && a.st === "closed") return false;
     if (term) {
       const hay = `${q.n} ${q.text} ${q.item || ""} ${a ? a.a || "" : ""} ${a ? a.r || "" : ""}`.toLowerCase();
       if (!hay.includes(term)) return false;
@@ -170,7 +194,7 @@ try {
       });
       html += `</details>`;
     });
-    if (!any) html += `<div class="no-match">${t("No question matches. Clear the search to see them all.")}</div>`;
+    if (!any) html += `<div class="no-match">${t("No question matches. Clear the search and the boxes to see them all.")}</div>`;
     $("qtable").innerHTML = html;
     $("qtable").querySelectorAll("details").forEach(d => d.addEventListener("toggle", () => { if (!filtering) openState.set(d.dataset.k, d.open); }));
   }
@@ -191,7 +215,7 @@ try {
     const gov = ["LAO", "KHM"].includes(iso);
     const block = (title, body) => (body ? `<div><h4>${title}</h4>${body}</div>` : "<div></div>");
     // the pipeline appends "SOURCE: <url>" lines to its quotes; the sources are listed once, on the right
-    const qText = a && a.q ? a.q.replace(/^\s*SOURCE:\s*\S+\s*$/gim, "").trim() : "";
+    const qText = a && a.q ? a.q.replace(/^\s*(?:CITED:\s*)?SOURCE:\s*\S+\s*$/gim, "").trim() : "";
     const srcs = a ? [...new Set([a.qu, ...(a.src || [])].filter(Boolean))] : [];
     const rows = [
       [block(t("Quoted passage"), qText ? `<blockquote>${esc(qText)}</blockquote>` : ""),
@@ -222,16 +246,15 @@ try {
     const q = meta.structure[sector].byId.get(r.dataset.id);
     r.insertAdjacentHTML("beforeend", detailHtml(q, data._byId.get(q.id)));
   }
-  htmlTips($("qtable"), t => {
-    const r = t.closest(".qrow"); if (!r) return "";
+  htmlTips($("qtable"), el => {
+    const r = el.closest(".qrow"); if (!r) return "";
     const q = meta.structure[sector].byId.get(r.dataset.id), a = data._byId.get(q.id);
     const k = dotKind(a, q);
     const what = k === "scored" ? t("Score of this answer: <b>{v}</b>", { v: pct(a.s) }) : k === "idk" ? t("I don't know") : k === "closed" ? t("Not asked: an earlier answer closes this question") : k === "answered" ? t("Answered; this question is not scored") : "";
     return `<div>${what}</div>`;
   });
-  const legend = () => dotLegend();
-  $("qlegend").innerHTML = legend();
-  onColours(() => { $("qlegend").innerHTML = legend(); if (data) drawTable(); });
+  drawLegend();
+  onColours(() => { drawLegend(); if (data) drawTable(); });
   responsive($("radar"), () => { if (data) drawRadarPanel(); });
   await load();
 } catch (err) { showError(document.querySelector(".pic-page"), err); }

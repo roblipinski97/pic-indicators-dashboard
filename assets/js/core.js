@@ -220,7 +220,7 @@ export function dotSvg(a, q, size = 14) {
 export function dotLegend({ compact = false } = {}) {
   const P = pal();
   const ramp = [0, 0.25, 0.5, 0.75, 1].map(s => `<i style="background:${scoreColor(s)};border-color:${darker(scoreColor(s))}"></i>`).join("");
-  return `<span class="key"><span class="lg-lo">${t("Lowest answer")}</span><span class="dot-ramp">${ramp}</span><span class="lg-hi">${t("Best answer")}</span></span>` +
+  return `<span class="key"><span class="lg-lo">${t("Worst answer")}</span><span class="dot-ramp">${ramp}</span><span class="lg-hi">${t("Best answer")}</span></span>` +
     `<span class="key">${dotSvg({ st: "idk" }, null, 12)}${t("I don't know")}</span>` +
     (compact ? "" : `<span class="key">${dotSvg({ st: "answered" }, { points: 0 }, 12)}${t("Answered, not scored")}</span>`) +
     `<span class="key">${dotSvg({ st: "closed" }, null, 12)}${t("Not asked")}</span>`;
@@ -295,27 +295,62 @@ export function svgFlag(sel, c, r, { ring = "var(--panel)", ringWidth = 2, edge 
 
 /* ---------------------------------------------------------------- tooltip */
 
-let tipEl;
+let tipEl, tipPinned = false, tipAt = null;
+/** One tooltip for the whole page. A tooltip can be pinned (tip.pin): it then stays where it is, takes clicks (links
+ * in it work) and ignores hovering elsewhere, until its close button, Escape or a click outside it. */
 export const tip = {
+  get pinned() { return tipPinned; },
+  el() {
+    if (!tipEl) {
+      tipEl = document.createElement("div"); tipEl.className = "pic-tip"; tipEl.setAttribute("role", "status"); document.body.appendChild(tipEl);
+      tipEl.addEventListener("click", ev => { if (ev.target.closest(".tt-close")) tip.unpin(); });
+      document.addEventListener("pointerdown", ev => { if (tipPinned && !tipEl.contains(ev.target) && !ev.target.closest("[data-pin]")) tip.unpin(); });
+      document.addEventListener("keydown", ev => { if (ev.key === "Escape" && tipPinned) tip.unpin(); });
+    }
+    return tipEl;
+  },
   show(html, ev) {
-    if (!tipEl) { tipEl = document.createElement("div"); tipEl.className = "pic-tip"; tipEl.setAttribute("role", "status"); document.body.appendChild(tipEl); }
-    tipEl.innerHTML = html;
-    tipEl.classList.add("on");
+    if (tipPinned) return;
+    const el = tip.el();
+    el.innerHTML = html;
+    el.classList.add("on");
     tip.move(ev);
   },
+  /** Keep the tooltip open where it is, with a close button. */
+  pin(html, ev) {
+    const el = tip.el();
+    tipPinned = false;
+    el.innerHTML = `<button type="button" class="tt-close" aria-label="${t("Close")}">×</button>` + html;
+    el.classList.add("on", "pinned");
+    el.setAttribute("role", "dialog");
+    tip.move(ev);
+    tipPinned = true;
+  },
+  unpin() {
+    tipPinned = false;
+    if (tipEl) { tipEl.classList.remove("on", "pinned"); tipEl.setAttribute("role", "status"); }
+  },
+  /** New content for the tooltip that is showing (e.g. once more data has loaded), at the same place. */
+  update(html) {
+    if (!tipEl || !tipEl.classList.contains("on")) return;
+    tipEl.innerHTML = (tipPinned ? `<button type="button" class="tt-close" aria-label="${t("Close")}">×</button>` : "") + html;
+    if (tipAt) { const p = tipPinned; tipPinned = false; tip.move(tipAt); tipPinned = p; }
+  },
   move(ev) {
-    if (!tipEl || !ev) return;
+    if (!tipEl || !ev || tipPinned) return;
     let x, y;
     if (typeof ev.clientX === "number" && (ev.clientX || ev.clientY)) { x = ev.clientX; y = ev.clientY; }
     else { const b = (ev.target || ev).getBoundingClientRect(); x = b.right; y = b.top; }
+    tipAt = { clientX: x, clientY: y };
     const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
     let left = x + 14, top = y + 14;
     if (left + w > window.innerWidth - 8) left = x - w - 14;
     if (top + h > window.innerHeight - 8) top = y - h - 14;
+    if (top < 8) top = Math.max(8, window.innerHeight - h - 8);
     tipEl.style.left = Math.max(8, left) + "px";
     tipEl.style.top = Math.max(8, top) + "px";
   },
-  hide() { if (tipEl) tipEl.classList.remove("on"); }
+  hide() { if (tipEl && !tipPinned) tipEl.classList.remove("on"); }
 };
 export function withTip(sel, html) {
   sel.attr("tabindex", 0)

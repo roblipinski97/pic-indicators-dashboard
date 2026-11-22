@@ -3,7 +3,8 @@
 // to one World Bank region.
 import { d3, loadMeta, loadGrid, params, setParams, pageUrl, segmented, tabs, fillSelect, responsive, onColours,
   esc, pct, num, plural, flagImg, flagUrl, dotSvg, dotLegend, scoreColor, darker, gradeChip, answerParts, htmlTips,
-  svgButton, showError, SECTORS, cssVar, lpSeries, allSeries, lpColour, pal, isDark, withTip, sectorLabel, t, tx } from "../core.js";
+  svgButton, showError, SECTORS, cssVar, lpSeries, allSeries, lpColour, pal, isDark, withTip, sectorLabel, t, tx,
+  loadAnswers, domainOf, tip } from "../core.js";
 import { drawRidges } from "../charts/ridges.js";
 
 const $ = id => document.getElementById(id);
@@ -89,15 +90,80 @@ try {
         if (!uOpen) return;
         sq.forEach(q => {
           const label = q.item ? `<span class="qn">${esc(q.n)}</span>${esc(q.item)}` : `<span class="qn">${esc(q.n)}</span>${esc(q.text)}`;
-          h += `<tr class="g-q"><td class="qcol" title="${esc(q.text)}">${label}</td>${cs.map(c => `<td class="cell" data-tip="q" data-q="${esc(q.id)}" data-c="${c.iso3}"${hlStyle(c.iso3)}>${dotSvg(cellOf(q, c.iso3), q, 13)}</td>`).join("")}</tr>`;
+          h += `<tr class="g-q"><td class="qcol" title="${esc(q.text)}">${label}</td>${cs.map(c => `<td class="cell" data-tip="q" data-pin="1" data-q="${esc(q.id)}" data-c="${c.iso3}"${hlStyle(c.iso3)}>${dotSvg(cellOf(q, c.iso3), q, 13)}</td>`).join("")}</tr>`;
         });
       });
     });
     h += `</tbody></table>`;
     $("grid").innerHTML = cs.length ? h : `<div class="empty">${t("No country in this region has answers for this questionnaire yet.")}</div>`;
     $("grid-note").textContent = `${plural(cs.length, "country", "countries")}. ${t("Click a flag to open the country's profile.")}`;
+    if ($("grid").querySelector("tr.g-q")) prefetch(cs.map(c => c.iso3));
+  }
+
+  /* ------------------------------------------------------------ one answer in full, on pointing at its dot */
+  // each country's full answers (quote, sources, rationale) are loaded when first needed, one file per country
+  const full = new Map(), ready = new Map();
+  const keyOf = iso => `${iso}-${year}-${sector}`;
+  const answersOf = iso => {
+    const k = keyOf(iso);
+    if (!full.has(k)) full.set(k, loadAnswers(iso, year, sector).catch(() => null).then(d => { ready.set(k, d); return d; }));
+    return full.get(k);
+  };
+  // once questions are on screen, the visible countries' files are fetched one after another in the background
+  let queue = Promise.resolve();
+  const prefetch = isos => isos.forEach(iso => { if (!full.has(keyOf(iso))) queue = queue.then(() => answersOf(iso)); });
+  // a long text cut at the end of a sentence near n characters
+  const clip = (s, n) => {
+    s = String(s || "").trim();
+    if (s.length <= n) return s;
+    const cut = s.slice(0, n), end = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf(".\n"), cut.lastIndexOf("; "));
+    return (end > n * 0.5 ? cut.slice(0, end + 1) : cut.slice(0, cut.lastIndexOf(" "))) + " …";
+  };
+  const shortUrl = u => { try { const x = new URL(u); return decodeURIComponent((x.hostname.replace(/^www\./, "") + x.pathname).replace(/\/$/, "") + x.search).replace(/\+/g, " "); } catch (e) { return u; } };
+  const block = (title, body) => `<div class="tt-block"><h5>${title}</h5>${body}</div>`;
+  let tipTarget = null;
+  function cellTip(td) {
+    const c = meta.byIso.get(td.dataset.c), st = meta.structure[sector], q = st.byId.get(td.dataset.q);
+    const x = (grid.items[q.id] || {})[c.iso3];
+    let h = `<div class="tt-head">${flagImg(c)}${esc(c.name)}</div>` +
+      `<div class="tt-muted" style="font-size:var(--fs-xs)">${esc(q.n)} ${esc(q.item ? q.text + " … " + q.item : q.text)}</div>`;
+    if (!x) return `<div class="tt-wide">${h}<div class="tt-muted">${t("No answer in the file")}</div></div>`;
+    const [s, sc, a, g] = x;
+    const txt = s === "idk" ? t("I don't know") : s === "closed" ? t("Not asked (an earlier answer closes it)") : s === "upload" ? t("Not answerable from documents") : clip(answerParts(a, q).join("; "), 300);
+    h += `<div class="tt-ans">${dotSvg({ st: s, s: sc }, q, 12)}<span><b>${esc(txt)}</b></span></div>` +
+      (g || (sc != null && q.points) ? `<div style="margin-top:6px">${g ? `${gradeChip(g, { title: false })} <span class="tt-muted">${t("evidence grade")}</span>` : ""}` +
+        `${sc != null && q.points ? `${g ? "<br>" : ""}<span class="tt-muted">${t("Score of this answer: <b>{v}</b>", { v: pct(sc) })}</span>` : ""}</div>` : "");
+    if (s !== "closed" && s !== "upload") {
+      const k = keyOf(c.iso3);
+      if (!ready.has(k)) h += `<div class="tt-block tt-muted">${t("Loading the quote and rationale…")}</div>`;
+      else {
+        const d = ready.get(k), A = d && d._byId.get(q.id);
+        if (A) {
+          // the pipeline appends "SOURCE: <url>" lines to its quotes; the sources are listed once, below
+          const quote = A.q ? A.q.replace(/^\s*(?:CITED:\s*)?SOURCE:\s*\S+\s*$/gim, "").trim() : "";
+          if (quote) h += block(t("Quoted passage"), `<p class="tt-quote">${esc(clip(quote, 550))}</p>`);
+          const srcs = [...new Set([A.qu, ...(A.src || [])].filter(Boolean))];
+          if (srcs.length) h += block(srcs.length > 1 ? t("Sources") : t("Source"), `<p class="tt-src">${srcs.slice(0, 3).map(u => /^https?:\/\//i.test(u)
+            ? `<a href="${esc(u)}" target="_blank" rel="noopener" title="${esc(u)}">${esc(shortUrl(u))}</a>` : `<span>${esc(u)}</span>`).join("")}` +
+            `${srcs.length > 3 ? `<span class="tt-muted">${t("and {n} more", { n: srcs.length - 3 })}</span>` : ""}</p>`);
+          if (A.r) h += block(t("Rationale"), `<p>${esc(clip(A.r, 750))}</p>`);
+          else if (s === "idk" && A.iw) h += block(t("Why the answer is \"I don't know\""), `<p>${esc(clip(A.iw, 500))}</p>`);
+        }
+      }
+    }
+    h += `<div class="tt-hint">${t("Click the dot to keep this open and use the links.")}</div>` +
+      `<div class="tt-foot"><a href="${pageUrl("country.html", { c: c.iso3, s: sector })}">${esc(t("Open {name}'s profile", { name: c.name }))}</a></div>`;
+    return `<div class="tt-wide">${h}</div>`;
+  }
+  // the tooltip of a dot; if the country's file is not in yet, it is filled in once it arrives
+  function qTip(td) {
+    const k = keyOf(td.dataset.c);
+    if (!ready.has(k)) answersOf(td.dataset.c).then(() => { if (tipTarget === td) tip.update(cellTip(td)); });
+    return cellTip(td);
   }
   $("grid").addEventListener("click", ev => {
+    const cell = ev.target.closest("td.cell");
+    if (cell) { tipTarget = cell; tip.pin(qTip(cell), ev); return; }
     const tr = ev.target.closest("tr.g-sec, tr.g-sub"); if (!tr) return;
     const k = tr.dataset.k;
     open.has(k) ? open.delete(k) : open.add(k);
@@ -105,22 +171,13 @@ try {
   });
   $("g-open").addEventListener("click", () => { const st = meta.structure[sector]; st.sections.forEach(s => { open.add("s:" + s.id); s.subsections.forEach(u => open.add("u:" + u.id)); }); drawGrid(); });
   $("g-close").addEventListener("click", () => { open.clear(); drawGrid(); });
-  htmlTips($("grid"), t => {
-    const c = meta.byIso.get(t.dataset.c), st = meta.structure[sector];
+  htmlTips($("grid"), el => {
+    const c = meta.byIso.get(el.dataset.c), st = meta.structure[sector];
     const head = `<div class="tt-head">${flagImg(c)}${esc(c.name)}</div>`;
-    if (t.dataset.tip === "q") {
-      const q = st.byId.get(t.dataset.q), x = (grid.items[q.id] || {})[c.iso3];
-      if (!x) return head + `<div class="tt-muted">${t("No answer in the file")}</div>`;
-      const [s, sc, a, g] = x;
-      const txt = s === "idk" ? t("I don't know") : s === "closed" ? t("Not asked (an earlier answer closes it)") : s === "upload" ? t("Not answerable from documents") : answerParts(a, q).join("; ");
-      return head + `<div class="tt-muted" style="font-size:var(--fs-xs)">${esc(q.n)} ${esc(q.item ? q.text + " … " + q.item : q.text)}</div>` +
-        `<div class="tt-ans">${dotSvg({ st: s, s: sc }, q, 12)}<span>${esc(txt)}</span></div>` +
-        (g ? `<div style="margin-top:6px">${gradeChip(g, { title: false })} <span class="tt-muted">${t("evidence grade")}</span></div>` : "") +
-        (sc != null && q.points ? `<div class="tt-muted">${t("Score of this answer: <b>{v}</b>", { v: pct(sc) })}</div>` : "");
-    }
-    const qs = t.dataset.tip === "sec" ? st.questions.filter(q => q.sec === t.dataset.k) : st.questions.filter(q => q.sub === t.dataset.k);
+    if (el.dataset.tip === "q") { if (!tip.pinned) tipTarget = el; return qTip(el); }
+    const qs = el.dataset.tip === "sec" ? st.questions.filter(q => q.sec === el.dataset.k) : st.questions.filter(q => q.sub === el.dataset.k);
     const v = avg(qs, c.iso3), cells = qs.map(q => (grid.items[q.id] || {})[c.iso3]).filter(Boolean);
-    const label = t.dataset.tip === "sec" ? st.secById.get(t.dataset.k).label : st.subLabel.get(t.dataset.k);
+    const label = el.dataset.tip === "sec" ? st.secById.get(el.dataset.k).label : st.subLabel.get(el.dataset.k);
     return head + `<div class="tt-muted">${esc(label)}</div>` +
       (v == null ? `<div>${t("No scored answer")}</div>` : `<div><span class="tt-val">${pct(v)}</span> <span class="tt-muted">${t("average score")}</span></div>`) +
       `<div class="tt-muted">${t("{a} answered, {b} \"I don't know\"", { a: cells.filter(x => x[0] === "answered").length, b: cells.filter(x => x[0] === "idk").length })}</div>`;
@@ -159,7 +216,8 @@ try {
     segmented($("mview"), [{ value: "table", label: t("Table") }, { value: "bars", label: t("Bar charts") }], missView, v => { missView = v; setParams({ m: v === "bars" ? "bars" : null }); drawMissing(); });
     if (missView === "bars") return drawIdkBars(areas, cs, m);
     $("miss-legend").innerHTML = "";
-    const rows = cs.map(c => ({ c, tot: m(c, "Total") })).sort((a, b) => (b.tot.idk ?? 0) - (a.tot.idk ?? 0));
+    // countries in the order chosen above (name, score or share answered), as in the other tabs
+    const rows = cs.map(c => ({ c, tot: m(c, "Total") }));
     const idk = cssVar("--ink-3");
     const cell = r => r.idk == null ? `<span class="muted">–</span>` :
       `<div class="mbar" title="${tx("{v} of {n} points", "{v} de {n} points", { v: pct(r.idk), n: num(r.possible) })}"><span style="width:${100 * r.idk}%;background:${idk}"></span><b>${pct(r.idk)}</b></div>`;
@@ -167,18 +225,18 @@ try {
       <tbody>${rows.map(r => `<tr${r.c.iso3 === hl ? ` class="is-hl"` : ""}><td style="white-space:nowrap"><a href="${pageUrl("country.html", { c: r.c.iso3, s: sector })}" style="color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:8px">${flagImg(r.c, 18)}${esc(r.c.name)}</a>
         <div class="muted" style="font-size:var(--fs-xs)">${r.tot.possible ? tx("{a} of {b} points", "{a} sur {b} points", { a: num(Math.round(r.tot.possible * r.tot.idk)), b: num(r.tot.possible) }) : ""}</div></td>
         <td>${cell(r.tot)}</td>${areas.map(a => `<td>${cell(m(r.c, a))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
-    $("miss-sub").textContent = tx(`Share of the points in each area on questions answered "I don't know", by country, highest first.`, `Part des points de chaque domaine sur des questions avec « Je ne sais pas », par pays, de la plus élevée à la plus faible.`);
+    $("miss-sub").textContent = tx(`Share of the points in each area on questions answered "I don't know", by country.`, `Part des points de chaque domaine sur des questions avec « Je ne sais pas », par pays.`);
     $("miss-note").textContent = t("Questions an earlier answer closes count as answered (zero points).");
   }
 
-  // the same figures as bar charts: one small chart per country (lowest share first), a bar per area, shaded by the
+  // the same figures as bar charts: one small chart per country (in the order chosen above), a bar per area, shaded by the
   // share in the chosen palette, with the points answered "I don't know" over the points possible above each bar
   const SHORT = { "Performance evaluation": "Perf. evaluation", "Information systems": "Info. systems", "Reporting and audit": "Reporting" };
   function drawIdkBars(areas, cs, m) {
     // the chosen palette's lowest-answer end (made dark enough to read), from very light to full
     const end = lpColour("de facto").color, panel = cssVar("--panel") || "#fff";
     const ramp = v => d3.interpolateLab(d3.interpolateLab(end, panel)(0.85), end)(v);
-    const rows = cs.map(c => ({ c, tot: m(c, "Total") })).filter(r => r.tot.idk != null).sort((a, b) => a.tot.idk - b.tot.idk || a.c.name.localeCompare(b.c.name));
+    const rows = cs.map(c => ({ c, tot: m(c, "Total") })).filter(r => r.tot.idk != null);
     const n = r => Math.round((r.possible || 0) * (r.idk || 0));
     const stops = d3.range(0, 1.01, 0.1).map(v => `${ramp(v)} ${v * 100}%`).join(",");
     $("miss-legend").innerHTML = `<span class="key">${t("Share of the area's points answered \"I don't know\":")}</span><span class="key">${pct(0)}<span class="ramp" style="background:linear-gradient(90deg,${stops})"></span>${pct(1)}</span><span class="key">${t("Above each bar: points answered \"I don't know\" of the points possible")}</span>`;
@@ -221,7 +279,7 @@ try {
         .attr("font-size", 10).attr("fill", "var(--ink-2)").text(a => t(SHORT[a] || a));
       withTip(g, z => `<div class="tt-head">${flagImg(c)}${esc(c.name)}</div><div class="tt-muted">${esc(t(z.a))}</div><div>${tx("<b>{v}</b> \"I don't know\" ({a} of {b} points)", "<b>{v}</b> « Je ne sais pas » ({a} sur {b} points)", { v: pct(z.r.idk), a: num(n(z.r)), b: num(z.r.possible) })}</div>`);
     });
-    $("miss-sub").textContent = tx(`Share of the points in each area on questions answered "I don't know", one chart per country, lowest first.`, `Part des points de chaque domaine sur des questions avec « Je ne sais pas », un graphique par pays, de la plus faible à la plus élevée.`);
+    $("miss-sub").textContent = tx(`Share of the points in each area on questions answered "I don't know", one chart per country.`, `Part des points de chaque domaine sur des questions avec « Je ne sais pas », un graphique par pays.`);
     $("miss-note").textContent = t("Questions an earlier answer closes count as answered (zero points).");
   }
 

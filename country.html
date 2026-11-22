@@ -33,7 +33,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-82af5a961b122452a9026400974767de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-57254d94ebbe2dc345c060e7ec3c8d4b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "language": {
     "search-no-results-text": "No results",
@@ -199,9 +199,11 @@ ul.task-list li input[type="checkbox"] {
         <p class="panel-sub" lang="en">Open a section to see its questions. Click a question, or "See more", for the quoted passage, the rationale and the options it could take.</p>
         <p class="panel-sub" lang="fr">Ouvrez une section pour voir ses questions. Cliquez sur une question, ou sur « Voir plus », pour le passage cité, la justification et les options possibles.</p>
       </div>
+      <div class="panel-tools no-print"><button type="button" class="btn-quiet" id="q-open"><span lang="en">Open all</span><span lang="fr">Tout ouvrir</span></button><button type="button" class="btn-quiet" id="q-close"><span lang="en">Close all</span><span lang="fr">Tout fermer</span></button></div>
     </div>
-    <div class="legend" id="qlegend"></div>
-    <div class="q-controls no-print">
+    <div class="q-bar no-print">
+      <div class="q-scale" id="qscale"></div>
+      <div class="q-omit" id="qomit"></div>
       <input type="search" id="search" placeholder="Search questions and answers" aria-label="Search questions and answers" data-fr-placeholder="Chercher dans les questions et les réponses" data-fr-aria-label="Chercher dans les questions et les réponses">
     </div>
     <div class="qtable" id="qtable"></div>
