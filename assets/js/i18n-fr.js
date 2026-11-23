@@ -287,5 +287,10 @@ export const FR = {
   "Score on de jure items": "Score sur les questions de jure",
   "Score on de facto items": "Score sur les questions de facto",
   "Download": "Télécharger",
-  "all answers": "toutes les réponses"
+  "all answers": "toutes les réponses",
+  "Radar": "Radar",
+  "Bars": "Barres",
+  "Pies": "Secteurs",
+  "Points earned": "Points obtenus",
+  "Points not earned": "Points non obtenus"
 };

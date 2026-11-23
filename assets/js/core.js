@@ -188,6 +188,12 @@ export const allSeries = () => ({ key: "all", label: t("All scored questions"), 
 export function scoreColor(s) {
   return d3.scaleThreshold().domain([0.2, 0.4, 0.6, 0.8]).range(pal().dots)(s);
 }
+// a softer colour for a score, for bars: the palette read continuously (in Lab) from 20% to 80% of the way along it,
+// so the strongest colours at both ends are not used
+export function scoreColorSoft(s, lo = 0.2, hi = 0.8) {
+  const ramp = d3.piecewise(d3.interpolateLab, pal().dots);
+  return d3.color(ramp(lo + (hi - lo) * Math.max(0, Math.min(1, s)))).formatHex();
+}
 export const darker = c => d3.lab(c).darker(isDark() ? -0.6 : 0.9).formatHex();
 
 // Five kinds of answer shown with a dot

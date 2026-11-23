@@ -379,5 +379,14 @@ export const ES = {
   "Each flag is a country: its score on the de jure questions against its score on the de facto questions, first for all areas together, then area by area. Below the diagonal, the de facto score is lower than the de jure score.": "Cada bandera es un país: su puntaje en las preguntas de jure frente a su puntaje en las preguntas de facto, primero para todas las áreas juntas y luego área por área. Por debajo de la diagonal, el puntaje de facto es inferior al de jure.",
   " For public finances (PFM), the de jure and de facto labels of the questions are still provisional.": " En finanzas públicas (GFP), la clasificación de jure y de facto de las preguntas es todavía provisional.",
   "Countries without both scores in an area are left out of its chart. Click a flag to open the country's profile.": "Los países que no tienen ambos puntajes en un área no aparecen en su gráfico. Haga clic en una bandera para abrir el perfil del país.",
-  "No chart for {a}: no country has both a de jure and a de facto score there.": "Sin gráfico para {a}: ningún país tiene allí a la vez un puntaje de jure y uno de facto."
+  "No chart for {a}: no country has both a de jure and a de facto score there.": "Sin gráfico para {a}: ningún país tiene allí a la vez un puntaje de jure y uno de facto.",
+  "Radar": "Radar",
+  "Bars": "Barras",
+  "Pies": "Sectores",
+  "Points earned": "Puntos obtenidos",
+  "Points not earned": "Puntos no obtenidos",
+  "Score (0→100%)": "Puntaje (0→100 %)",
+  "Share of<br>I don't know": "Proporción de<br>«No sé»",
+  "Bar charts of scores by area: ": "Gráficos de barras de los puntajes por área: ",
+  "Pie charts of scores by area: ": "Gráficos de sectores de los puntajes por área: "
 };

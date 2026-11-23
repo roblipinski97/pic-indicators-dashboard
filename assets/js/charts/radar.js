@@ -1,4 +1,5 @@
-// Radar chart of area scores: one axis per area, rings at 25, 50, 75 and 100%. Up to two shapes (e.g. de jure and
+// Radar chart of area scores: one axis per area, rings at 25, 50, 75 and 100%; 0% is a small circle round the centre,
+// so that areas scoring 0 stay apart instead of meeting in one point. Up to two shapes (e.g. de jure and
 // de facto). The vertices are coloured by score with the active palette; the area list next to it gives the
 // exact figures, since a filled shape is easy to over-read.
 import { d3, scoreColor, pct, esc, withTip, t, tx, isFr } from "../core.js";
@@ -15,20 +16,24 @@ export function drawRadar(el, { areas, series, labels = new Map(), width }) {
   const svg = d3.select(el).append("svg").attr("width", W).attr("height", H).attr("viewBox", `0 0 ${W} ${H}`)
     .attr("role", "img").attr("aria-label", tx("Radar chart of scores by area: ", "Graphique radar des scores par domaine : ") + areas.map(a => labels.get(a) || a).join(", "));
   const n = areas.length, ang = i => -Math.PI / 2 + (2 * Math.PI * i) / n;
-  const pt = (i, v) => [cx + Math.cos(ang(i)) * R * v, cy + Math.sin(ang(i)) * R * v];
+  const R0 = R * 0.13, rad = v => R0 + (R - R0) * v;   // the radius of a score: 0% at R0, 100% at R
+  const pt = (i, v) => [cx + Math.cos(ang(i)) * rad(v), cy + Math.sin(ang(i)) * rad(v)];
 
   // rings and spokes
   const g = svg.append("g");
+  // the 0% circle, faint and dotted, then the rings
+  g.append("circle").attr("cx", cx).attr("cy", cy).attr("r", R0).attr("fill", "none").attr("stroke", "var(--line)").attr("stroke-dasharray", "1 3");
   [0.25, 0.5, 0.75, 1].forEach(r => {
-    g.append("circle").attr("cx", cx).attr("cy", cy).attr("r", R * r).attr("fill", "none")
+    g.append("circle").attr("cx", cx).attr("cy", cy).attr("r", rad(r)).attr("fill", "none")
       .attr("stroke", r === 1 ? "var(--line-3)" : "var(--line)").attr("stroke-dasharray", r === 0.5 ? "4 3" : null);
     // ring labels sit between the first two spokes, away from the values
     const a0 = -Math.PI / 2 + Math.PI / n;
-    g.append("text").attr("x", cx + Math.cos(a0) * R * r + 2).attr("y", cy + Math.sin(a0) * R * r - 2).attr("font-size", 10.5).attr("fill", "var(--ink-4)").text(pct(r));
+    g.append("text").attr("x", cx + Math.cos(a0) * rad(r) + 2).attr("y", cy + Math.sin(a0) * rad(r) - 2).attr("font-size", 10.5).attr("fill", "var(--ink-4)").text(pct(r));
   });
   areas.forEach((a, i) => {
     const [x, y] = pt(i, 1);
-    g.append("line").attr("x1", cx).attr("y1", cy).attr("x2", x).attr("y2", y).attr("stroke", "var(--line)");
+    const [x0, y0] = pt(i, 0);
+    g.append("line").attr("x1", x0).attr("y1", y0).attr("x2", x).attr("y2", y).attr("stroke", "var(--line)");
     const [lx, ly] = pt(i, narrow ? 1.17 : 1.2), c = Math.cos(ang(i));
     const anchor = Math.abs(c) < 0.2 ? "middle" : c > 0 ? "start" : "end";
     const words = String(labels.get(a) || a).split(" ");
@@ -60,7 +65,10 @@ export function drawRadar(el, { areas, series, labels = new Map(), width }) {
       if (series.length === 1 || !narrow) {
         const off = series.length === 2 ? (si === 0 ? -1 : 1) : 0;
         const c = Math.cos(ang(i)), sn = Math.sin(ang(i));
-        const tx = x + (Math.abs(c) < 0.3 ? 10 * (off || 1) : c * 14), ty = y + (Math.abs(c) < 0.3 ? sn * 14 : 4 + off * 9);
+        // a value near 0 is labelled a little way out along its spoke, so that the labels of several points at the
+        // centre don't sit on top of one another
+        const [bx, by] = v < 0.1 ? pt(i, 0.1) : [x, y];
+        const tx = bx + (Math.abs(c) < 0.3 ? 10 * (off || 1) : c * 14), ty = by + (Math.abs(c) < 0.3 ? sn * 14 : 4 + off * 9);
         svg.append("text").attr("x", tx).attr("y", ty).attr("text-anchor", Math.abs(c) < 0.3 ? (off < 0 ? "end" : "start") : c > 0 ? "start" : "end")
           .attr("font-size", 11).attr("font-weight", 600).attr("fill", s.color).attr("paint-order", "stroke")
           .attr("stroke", "var(--panel)").attr("stroke-width", 3).text(pct(v));

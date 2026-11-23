@@ -1,9 +1,10 @@
 // Country profile: the run, the scores by area (radar and table), and every question section by section.
 import { d3, loadMeta, loadAnswers, params, setParams, pageUrl, countryMenu, segmented, fillSelect, responsive,
   onColours, esc, pct, num, plural, flagImg, flagUrl, dotSvg, dotLegend, dotKind, gradeChip, quoteMark, GRADES,
-  answerParts, domainOf, scoreColor, darker, htmlTips, svgButton, showError, SECTORS, lpSeries, allSeries, cssVar, sectorLabel,
+  answerParts, domainOf, scoreColor, scoreColorSoft, darker, htmlTips, svgButton, showError, SECTORS, lpSeries, allSeries, cssVar, sectorLabel,
   t, tx, isFr, isEs } from "../core.js";
 import { drawRadar } from "../charts/radar.js";
+import { drawAreaBars, drawAreaPies, shadeOpacity } from "../charts/minis.js";
 
 const $ = id => document.getElementById(id);
 // how the web chatbot's answer compares with the pipeline's (codes written by the pipeline), in words
@@ -30,6 +31,7 @@ try {
   let sector = ["HRM", "PFM"].includes(P.get("s")) ? P.get("s") : "HRM";
   let year = meta.years.includes(+P.get("y")) ? +P.get("y") : meta.years[0];
   const radarMode = { HRM: "all", PFM: "all" };   // all questions, or de jure and de facto
+  const chartType = { HRM: "radar", PFM: "radar" };   // radar, bars or pies
   let term = "";
   const openState = new Map();     // which sections and subsections the reader opened
   let data = null;
@@ -98,12 +100,13 @@ try {
     $("head").innerHTML = `<img class="big-flag" src="${flagUrl(c)}" alt="">
       <div><h2>${esc(c.name)}</h2><p class="run">${sectorLabel(sector, { h: 20 })}</p></div>`;
     $("tools").innerHTML = `<a class="btn-quiet" href="${pageUrl("compare.html", { s: sector, hl: iso })}">${t("Compare with other countries")}</a>`;
-    svgButton($("tools"), () => $("radar").querySelector("svg"), () => `pic-${iso}-${sector}-${year}-radar`);
+    svgButton($("tools"), () => $("radar").querySelector("svg"), () => `pic-${iso}-${sector}-${year}-${chartType[sector]}`);
     const asked = (cnt.answered || 0) + (cnt.idk || 0);
     $("facts").innerHTML =
       `<div><dt>${t("Answered")}</dt><dd>${num(cnt.answered || 0)} <small>${t("of {n} asked", { n: num(asked) })}</small></dd></div>` +
       `<div><dt>${t("I don't know")}</dt><dd>${num(cnt.idk || 0)}</dd></div>` +
-      `<div><dt>${t("Not asked")}</dt><dd>${num(cnt.closed || 0)}</dd></div>`;
+      // not asked: apart from the two above, which add up to the questions asked
+      `<div class="not-asked"><dt>${t("Not asked")}</dt><dd>${num(cnt.closed || 0)}</dd></div>`;
   }
 
   /* ------------------------------------------------------------ radar and area table */
@@ -114,21 +117,33 @@ try {
     const series = mode === "lp"
       ? lpSeries().map(s => ({ ...s, values: new Map(areas.map(a => [a, sc(a, s.key).score ?? null])) }))
       : [{ ...allSeries(), values: new Map(areas.map(a => [a, sc(a, "all").score ?? null])) }];
-    const key = s => `<span class="key"><svg width="24" height="12" aria-hidden="true"><rect x="1" y="1" width="22" height="10" fill="${s.fill}" stroke="${s.color}" stroke-width="2" ${s.dash ? `stroke-dasharray="${s.dash}"` : ""}/></svg>${esc(s.label)}</span>`;
-    $("radar-legend").innerHTML = `<span id="rmode"></span>` + series.map(key).join("");
+    const type = chartType[sector];
+    // the de jure / de facto key, shaded as the shapes are (dashed de jure on the radar only; bars and pies have solid
+    // outlines); all questions need no key
+    const key = s => `<span class="key"><svg width="24" height="12" aria-hidden="true"><rect x="1" y="1" width="22" height="10" fill="${s.fill}" fill-opacity="${shadeOpacity(series.length)}" stroke="${s.color}" stroke-width="2" ${s.dash && type === "radar" ? `stroke-dasharray="${s.dash}"` : ""}/></svg>${esc(s.label)}</span>`;
+    const keys = mode === "lp" ? series.map(key).join("") : "";
+    // one line: the questions, then the chart type; the key at the top left of the chart
+    $("radar-legend").innerHTML = `<span id="rmode"></span><span id="ctype"></span>`;
+    if (!$("radar-keys")) $("radar").insertAdjacentHTML("beforebegin", `<div class="legend chart-keys" id="radar-keys"></div>`);
+    $("radar-keys").innerHTML = keys;
+    $("radar-keys").className = `legend chart-keys${type === "radar" ? " over" : ""}${keys ? "" : " empty"}`;
     segmented($("rmode"), [{ value: "all", label: t("All questions") }, { value: "lp", label: t("De jure and de facto") }], mode, v => { radarMode[sector] = v; drawRadarPanel(); });
-    drawRadar($("radar"), { areas, series, labels: new Map(areas.map(a => [a, t(a)])), width: $("radar").clientWidth });
+    segmented($("ctype"), [{ value: "radar", label: t("Radar") }, { value: "bars", label: t("Bars") }, { value: "pies", label: t("Pies") }], type,
+      v => { chartType[sector] = v; drawRadarPanel(); });
+    const draw = type === "bars" ? drawAreaBars : type === "pies" ? drawAreaPies : drawRadar;
+    draw($("radar"), { areas, series, labels: new Map(areas.map(a => [a, t(a)])), width: $("radar").clientWidth });
 
     // the exact figures
     const rows = areas.map(a => ({ a, all: sc(a, "all"), dj: sc(a, "de jure"), df: sc(a, "de facto") }));
     const tot = sc("Total", "all");
+    // bars in the palette's softer middle colours (20% to 80% of the way along it)
     const bar = r => r.score == null ? `<span class="muted">${t("no answer")}</span>` :
-      `<div class="bar"><span style="width:${100 * r.score}%;background:${scoreColor(r.score)}"></span></div>`;
-    $("areas").innerHTML = `<thead><tr><th>${t("Area")}</th><th style="width:30%">${t("Score")}</th><th class="num"></th><th class="num">${t("De jure")}</th><th class="num">${t("De facto")}</th><th class="num" title="${tx("Share of the area's points on questions answered I don't know", "Part des points du domaine sur des questions avec « Je ne sais pas »")}">${t("I don't know")}</th></tr></thead>
-      <tbody>${rows.map(r => `<tr><td>${esc(t(r.a))}</td><td>${bar(r.all)}</td><td class="num"><b>${pct(r.all.score)}</b></td>
-        <td class="num">${pct(r.dj.score)}</td><td class="num">${pct(r.df.score)}</td><td class="num">${pct(r.all.idk)}</td></tr>`).join("")}
-        <tr class="tot"><td><b>${t("All areas")}</b></td><td>${bar(tot)}</td><td class="num"><b>${pct(tot.score)}</b></td>
-        <td class="num">${pct(sc("Total", "de jure").score)}</td><td class="num">${pct(sc("Total", "de facto").score)}</td><td class="num">${pct(tot.idk)}</td></tr></tbody>`;
+      `<div class="bar"><span style="width:${100 * r.score}%;background:${scoreColorSoft(r.score)}"></span></div>`;
+    $("areas").innerHTML = `<thead><tr><th>${t("Area")}</th><th style="width:30%">${tx("Score (0→100%)", "Score (0→100 %)")}</th><th class="num"><span class="narrow-only">${tx("Score (0→100%)", "Score (0→100 %)")}</span></th><th class="num">${t("De jure")}</th><th class="num">${t("De facto")}</th><th class="num idk-col" title="${tx("Share of the area's points on questions answered I don't know", "Part des points du domaine sur des questions avec « Je ne sais pas »")}">${tx("Share of<br>I don't know", "Part de<br>« Je ne sais pas »")}</th></tr></thead>
+      <tbody><tr class="tot"><td><b>${t("All areas")}</b></td><td>${bar(tot)}</td><td class="num"><b>${pct(tot.score)}</b></td>
+        <td class="num">${pct(sc("Total", "de jure").score)}</td><td class="num">${pct(sc("Total", "de facto").score)}</td><td class="num idk-col">${pct(tot.idk)}</td></tr>
+        ${rows.map(r => `<tr><td>${esc(t(r.a))}</td><td>${bar(r.all)}</td><td class="num"><b>${pct(r.all.score)}</b></td>
+        <td class="num">${pct(r.dj.score)}</td><td class="num">${pct(r.df.score)}</td><td class="num idk-col">${pct(r.all.idk)}</td></tr>`).join("")}</tbody>`;
     $("area-note").textContent = tx(`Score: points earned as a share of the points possible, leaving out the questions answered "I don't know". De jure and de facto: the same score on the questions about the law and about practice. I don't know: share of the area's points on questions answered "I don't know".`,
       `Score : points obtenus en part des points possibles, sans les questions répondues « Je ne sais pas ». De jure et de facto : le même score sur les questions portant sur le droit et sur la pratique. Je ne sais pas : part des points du domaine sur des questions avec « Je ne sais pas ».`) +
       (isFr() || isEs() ? " " + t("Answers, quotes and rationales are shown in the language of the source and of the pipeline (mostly English).") : "");
