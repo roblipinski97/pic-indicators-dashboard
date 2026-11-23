@@ -11,7 +11,7 @@
 // moves beside it, to the side with the least land, with a thin line back to the country. The map data (Natural
 // Earth 1:10m countries and populated places, Equal Earth projection, the frame of the GSPS dotted map) is built by
 // prep/make_world_map.R.
-import { d3, getJSON, svgFlag, withTip, t, tx, isFr } from "../core.js";
+import { d3, getJSON, svgFlag, withTip, t, tx, isFr, isEs } from "../core.js";
 
 const S0 = 6.4;       // distance between hexagon centres at the world view, in map units (the map is 960 wide)
 const KMAX = 128;     // largest zoom (an island of 30 km is then about 110 units across)
@@ -346,7 +346,7 @@ export async function hexMap(root, { marks, label }) {
       if (!placesLoad) placesLoad = getJSON("assets/geo/world-places.json").then(d => { places = d.places; labels(); }).catch(() => {});
       return;
     }
-    const zz = Math.log2(big()) + 1.7, fr = isFr();
+    const zz = Math.log2(big()) + 1.7, fr = isFr(), es = isEs();
     const boxes = ms.filter(m => m.on).map(m => { const x = m.px + m.dx, y = m.py + m.dy, r = m.r + 2; return [x - r, y - r, x + r, y + r]; });
     const hit = b => boxes.some(c => b[0] < c[2] && b[2] > c[0] && b[1] < c[3] && b[3] > c[1]);
     const out = [];
@@ -355,7 +355,7 @@ export async function hexMap(root, { marks, label }) {
       if (p[2] / 10 > zz + (cap ? 2 : 0.3)) continue;
       const [x, y] = T.apply([p[0], p[1]]);
       if (!inView(x, y, -4 / pxu)) continue;
-      const name = fr && p[5] ? p[5] : p[4], px = cap ? 11 : 10;
+      const name = (fr && p[5]) || (es && p[6]) || p[4], px = cap ? 11 : 10;
       meas.font = `${cap ? 600 : 400} ${px}px "Public Sans", sans-serif`;
       const w = meas.measureText(name).width / pxu, fs = px / pxu, r = (cap ? 2.6 : 1.9) / pxu, gap = 3 / pxu;
       let side = 1, b = [x - r - 1, y - fs * 0.62, x + r + gap + w, y + fs * 0.62];

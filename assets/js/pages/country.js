@@ -2,7 +2,7 @@
 import { d3, loadMeta, loadAnswers, params, setParams, pageUrl, countryMenu, segmented, fillSelect, responsive,
   onColours, esc, pct, num, plural, flagImg, flagUrl, dotSvg, dotLegend, dotKind, gradeChip, quoteMark, GRADES,
   answerParts, domainOf, scoreColor, darker, htmlTips, svgButton, showError, SECTORS, lpSeries, allSeries, cssVar, sectorLabel,
-  t, tx, isFr } from "../core.js";
+  t, tx, isFr, isEs } from "../core.js";
 import { drawRadar } from "../charts/radar.js";
 
 const $ = id => document.getElementById(id);
@@ -13,7 +13,13 @@ const WC_FR = { same_answer: "même réponse", unsupported: "non étayée", conf
   adjudicated_web: "tranchée par la recherche web", confirmed: "confirmée", conflict_recorded: "désaccord consigné",
   multiple_choice_not_adjudicated: "choix multiple non tranché", stale: "ancienne", adjudicated_pipeline: "tranchée par le pipeline",
   closed_by_routing: "fermée par le filtrage", contradicted: "contredite", not_in_force: "pas en vigueur" };
-const wcText = w => (isFr() ? w.replace(/[a-z_]+/g, k => WC_FR[k] || k.replace(/_/g, " ")) : w.replace(/_/g, " "));
+const WC_ES = { same_answer: "misma respuesta", unsupported: "sin respaldo", conflict_unverified: "desacuerdo no verificado", chatbot_idk: "el asistente no sabe",
+  not_current: "no vigente", unreachable: "página inaccesible", supports_other: "respalda otra respuesta", out_of_scope: "fuera del alcance",
+  quote_failed: "cita no encontrada", not_authoritative: "fuente no oficial", planned_not_current: "prevista, no vigente", published: "publicada",
+  adjudicated_web: "resuelta por la búsqueda web", confirmed: "confirmada", conflict_recorded: "desacuerdo registrado",
+  multiple_choice_not_adjudicated: "opción múltiple no resuelta", stale: "antigua", adjudicated_pipeline: "resuelta por el pipeline",
+  closed_by_routing: "cerrada por el filtro", contradicted: "contradicha", not_in_force: "no vigente" };
+const wcText = w => (isFr() || isEs() ? w.replace(/[a-z_]+/g, k => (isFr() ? WC_FR : WC_ES)[k] || k.replace(/_/g, " ")) : w.replace(/_/g, " "));
 const CHEV = `<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 try {
@@ -48,8 +54,9 @@ try {
   let searchT;
   $("search").addEventListener("input", e => { clearTimeout(searchT); searchT = setTimeout(() => { term = e.target.value.trim().toLowerCase(); drawTable(); }, 150); });
   // the legend of the table: the answer scale from worst to best, then "I don't know", "answered, not scored" and
-  // "not asked" one under the other, each with a tick box that leaves those questions out of the table
-  const hide = { idk: false, unscored: false, closed: false };
+  // "not asked" one under the other, each with a tick box that leaves those questions out of the table, and next to
+  // them the same for de jure and de facto questions
+  const hide = { idk: false, unscored: false, closed: false, dj: false, df: false };
   function drawLegend() {
     const ramp = [0, 0.25, 0.5, 0.75, 1].map(v => `<i style="background:${scoreColor(v)};border-color:${darker(scoreColor(v))}"></i>`).join("");
     $("qscale").innerHTML = `<span class="lg-lo">${t("Worst answer")}</span><span class="dot-ramp">${ramp}</span><span class="lg-hi">${t("Best answer")}</span>`;
@@ -58,8 +65,14 @@ try {
       row("idk", dotSvg({ st: "idk" }, null, 14), t("I don't know"), t("Omit the questions answered \"I don't know\"")) +
       row("unscored", dotSvg({ st: "answered" }, { points: 0 }, 14), t("Answered, not scored"), t("Omit the questions that are not scored")) +
       row("closed", dotSvg({ st: "closed" }, null, 14), t("Not asked"), t("Omit the questions not asked"));
+    const lpRow = (k, label, aria) => `<label class="omit-row"><span>${label}</span><input type="checkbox" data-k="${k}"${hide[k] ? " checked" : ""} aria-label="${esc(aria)}"></label>`;
+    $("qomitlp").innerHTML = `<span></span><span class="omit-h">${t("Omit")}</span>` +
+      lpRow("dj", t("De jure"), t("Omit the de jure questions")) +
+      lpRow("df", t("De facto"), t("Omit the de facto questions"));
   }
-  $("qomit").addEventListener("change", e => { const k = e.target.dataset.k; if (!k) return; hide[k] = e.target.checked; if (data) drawTable(); });
+  for (const id of ["qomit", "qomitlp"]) {
+    $(id).addEventListener("change", e => { const k = e.target.dataset.k; if (!k) return; hide[k] = e.target.checked; if (data) drawTable(); });
+  }
   // open or close every section and subsection
   const setAll = on => {
     const st = meta.structure[sector];
@@ -118,7 +131,7 @@ try {
         <td class="num">${pct(sc("Total", "de jure").score)}</td><td class="num">${pct(sc("Total", "de facto").score)}</td><td class="num">${pct(tot.idk)}</td></tr></tbody>`;
     $("area-note").textContent = tx(`Score: points earned as a share of the points possible, leaving out the questions answered "I don't know". De jure and de facto: the same score on the questions about the law and about practice. I don't know: share of the area's points on questions answered "I don't know".`,
       `Score : points obtenus en part des points possibles, sans les questions répondues « Je ne sais pas ». De jure et de facto : le même score sur les questions portant sur le droit et sur la pratique. Je ne sais pas : part des points du domaine sur des questions avec « Je ne sais pas ».`) +
-      (isFr() ? " " + t("Answers, quotes and rationales are shown in the language of the source and of the pipeline (mostly English).") : "");
+      (isFr() || isEs() ? " " + t("Answers, quotes and rationales are shown in the language of the source and of the pipeline (mostly English).") : "");
   }
 
   /* ------------------------------------------------------------ the questions */
@@ -127,6 +140,8 @@ try {
     if (hide.idk && a && a.st === "idk") return false;
     if (hide.unscored && !(q.points > 0)) return false;
     if (hide.closed && a && a.st === "closed") return false;
+    if (hide.dj && q.lp === "de jure") return false;
+    if (hide.df && q.lp === "de facto") return false;
     if (term) {
       const hay = `${q.n} ${q.text} ${q.item || ""} ${a ? a.a || "" : ""} ${a ? a.r || "" : ""}`.toLowerCase();
       if (!hay.includes(term)) return false;
@@ -200,7 +215,8 @@ try {
   }
 
   // a click on a question opens the details under it
-  // the details of one answer: the options and their scores across the top, then two columns (the main text on the
+  // the details of one answer: the options and their scores and the question's type (de jure or de facto) across the
+  // top, then two columns (the main text on the
   // left, what it rests on on the right): quote and source, rationale and grade, and at the bottom the web chatbot's
   // and the reviewer's answers
   function detailHtml(q, a) {
@@ -227,7 +243,10 @@ try {
       [block(t("Web chatbot's answer"), a && a.web ? `<p>${esc(answerParts(a.web, q).join("; "))}${a.wc ? ` <span class="muted">(${esc(wcText(a.wc))})</span>` : ""}</p>` : ""),
        block(gov ? t("The government's own answer") : t("Human reviewer's answer"), a && a.rev ? `<p>${esc(answerParts(a.rev, q).join("; "))}${a.ag ? ` <span class="muted">(${a.ag === "Yes" ? t("agrees with the AI") : t("differs from the AI")})</span>` : ""}${a.revn ? `<br><span class="muted">${esc(a.revn)}</span>` : ""}</p>` : "")]
     ].filter(r => r.some(c => c !== "<div></div>"));
-    return `<div class="qdetail">${optRow}<div class="d-grid">${rows.flat().join("")}</div></div>`;
+    // across the top: the options (wrapping onto more lines when they are many), and on the right the question's type
+    const lp = q.lp === "de jure" ? t("De jure") : q.lp === "de facto" ? t("De facto") : "";
+    const typeBlock = `<div class="d-type"><h4>${t("Question type")}</h4><p>${lp || `<span class="muted">${t("Not classified")}</span>`}</p></div>`;
+    return `<div class="qdetail"><div class="d-top">${optRow || "<div></div>"}${typeBlock}</div><div class="d-grid">${rows.flat().join("")}</div></div>`;
   }
   $("qtable").addEventListener("click", ev => {
     if (ev.target.closest("a, .qdetail")) return;

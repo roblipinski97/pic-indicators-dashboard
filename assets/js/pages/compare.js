@@ -1,11 +1,13 @@
-// Compare countries: the answers of every country question by question (dots, with collapsible sections), the
-// distribution of area scores (ridgelines), and where the answer is "I don't know" (bars). Countries can be limited
-// to one World Bank region.
+// Compare countries: the answers of every country question by question (dots, with collapsible sections, under a
+// pinned row with each country's score across all areas), the distribution of area scores (ridgelines), de jure
+// against de facto scores area by area (scatters), and where the answer is "I don't know" (bars). Countries can be
+// limited to one World Bank region.
 import { d3, loadMeta, loadGrid, params, setParams, pageUrl, segmented, tabs, fillSelect, responsive, onColours,
   esc, pct, num, plural, flagImg, flagUrl, dotSvg, dotLegend, scoreColor, darker, gradeChip, answerParts, htmlTips,
   svgButton, showError, SECTORS, cssVar, lpSeries, allSeries, lpColour, pal, isDark, withTip, sectorLabel, t, tx,
   loadAnswers, domainOf, tip } from "../core.js";
 import { drawRidges } from "../charts/ridges.js";
+import { drawLpScatters } from "../charts/scatter.js";
 
 const $ = id => document.getElementById(id);
 const CHEV = `<svg class="chev" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -18,7 +20,8 @@ try {
   const regions = [...new Set(meta.withData.map(c => c.region).filter(Boolean))].sort();
   let region = regions.includes(P.get("r")) ? P.get("r") : "";
   let order = ["name", "score", "answered"].includes(P.get("o")) ? P.get("o") : "name";
-  let view = ["grid", "dist", "missing"].includes(P.get("v")) ? P.get("v") : "grid";
+  const VIEWS = ["grid", "dist", "lp", "missing"];
+  let view = VIEWS.includes(P.get("v")) ? P.get("v") : "grid";
   const distMode = { HRM: "all", PFM: "all" };   // all questions, or de jure and de facto
   let missView = P.get("m") === "bars" ? "bars" : "table";   // "I don't know" answers as a table or as bar charts
   const hl = meta.byIso.has(P.get("hl")) ? P.get("hl") : null;
@@ -31,10 +34,11 @@ try {
   fillSelect($("region"), [{ value: "", label: t("All regions") }, ...regions.map(r => ({ value: r, label: t(r) }))], region);
   $("region").addEventListener("change", e => { region = e.target.value; setParams({ r: region || null }); draw(); });
   segmented($("order"), [{ value: "name", label: t("Name") }, { value: "score", label: t("Score") }, { value: "answered", label: t("Share answered") }], order, v => { order = v; setParams({ o: v === "name" ? null : v }); draw(); });
-  tabs($("tabs"), [{ value: "grid", label: t("Question by question") }, { value: "dist", label: t("Distribution of scores") }, { value: "missing", label: t("I don't know answers") }], view, v => { view = v; showView(); });
+  tabs($("tabs"), [{ value: "grid", label: t("Question by question") }, { value: "dist", label: t("Distribution of scores") },
+    { value: "lp", label: t("De jure against de facto") }, { value: "missing", label: t("I don't know answers") }], view, v => { view = v; showView(); });
 
   function showView() {
-    ["grid", "dist", "missing"].forEach(k => { $("view-" + k).hidden = k !== view; });
+    VIEWS.forEach(k => { $("view-" + k).hidden = k !== view; });
     setParams({ v: view === "grid" ? null : view });
     draw();
   }
@@ -59,6 +63,7 @@ try {
     if (!grid) return;
     if (view === "grid") drawGrid();
     if (view === "dist") drawDist();
+    if (view === "lp") drawLp();
     if (view === "missing") drawMissing();
   }
 
@@ -69,14 +74,23 @@ try {
     qs.forEach(q => { const cell = (grid.items[q.id] || {})[iso]; if (cell && cell[1] != null && q.points > 0) { e += q.points * cell[1]; p += q.points; } });
     return p ? e / p : null;
   }
+  // the pinned top row: each country's score across all areas, as a larger dot with the score written inside (dark or
+  // white figures, whichever reads better on the dot's colour)
+  const totalDot = v => {
+    if (v == null) return `<svg width="30" height="30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="none" stroke="var(--line-3)" stroke-dasharray="2 2"/></svg>`;
+    const f = scoreColor(v), c = d3.rgb(f), lum = (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) / 255;
+    return `<svg width="30" height="30" aria-hidden="true"><circle cx="15" cy="15" r="14" fill="${f}" stroke="${darker(f)}"/>` +
+      `<text x="15" y="15" dy="0.35em" text-anchor="middle" font-size="${v >= 0.995 ? 10 : 11.5}" font-weight="700" fill="${lum > 0.58 ? "#13202e" : "#ffffff"}" style="font-variant-numeric:tabular-nums">${Math.round(v * 100)}</text></svg>`;
+  };
   const avgDot = v => (v == null ? `<svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="var(--line-3)" stroke-dasharray="2 2"/></svg>`
     : `<svg width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="${scoreColor(v)}" stroke="${darker(scoreColor(v))}"/></svg>`);
 
   function drawGrid() {
     const st = meta.structure[sector], cs = countries();
     const cellOf = (q, iso) => { const x = (grid.items[q.id] || {})[iso]; return x ? { st: x[0], s: x[1], a: x[2], g: x[3] } : null; };
-    let h = `<table class="dgrid"><thead><tr><th class="qcol">Question</th>${cs.map(c => `<th class="${c.iso3 === hl ? "is-hl" : ""}"><div class="fl"><a href="${pageUrl("country.html", { c: c.iso3, s: sector })}" title="${esc(t("Open {name}'s profile", { name: c.name }))}">${flagImg(c, 24)}</a><span>${c.iso3}</span></div></th>`).join("")}</tr></thead><tbody>`;
+    let h = `<table class="dgrid"><thead><tr><th class="qcol">${t("Question")}</th>${cs.map(c => `<th class="${c.iso3 === hl ? "is-hl" : ""}"><div class="fl"><a href="${pageUrl("country.html", { c: c.iso3, s: sector })}" title="${esc(t("Open {name}'s profile", { name: c.name }))}">${flagImg(c, 24)}</a><span>${c.iso3}</span></div></th>`).join("")}</tr>`;
     const hlStyle = iso => (iso === hl ? ` style="box-shadow: inset 2px 0 0 var(--ink), inset -2px 0 0 var(--ink)"` : "");
+    h += `<tr class="g-total"><th class="qcol">${t("All areas")}</th>${cs.map(c => `<th data-tip="total" data-c="${c.iso3}"${hlStyle(c.iso3)}>${totalDot((meta.scoreOf(c.iso3, sector, "Total", "all", year) || {}).score)}</th>`).join("")}</tr></thead><tbody>`;
     st.sections.forEach(sec => {
       const qs = st.questions.filter(q => q.sec === sec.id);
       const sOpen = open.has("s:" + sec.id);
@@ -96,6 +110,9 @@ try {
     });
     h += `</tbody></table>`;
     $("grid").innerHTML = cs.length ? h : `<div class="empty">${t("No country in this region has answers for this questionnaire yet.")}</div>`;
+    // the "All areas" row sticks right under the row of flags
+    const top = $("grid").querySelector("thead tr");
+    if (top) $("grid").style.setProperty("--dg-h", top.offsetHeight + "px");
     $("grid-note").textContent = `${plural(cs.length, "country", "countries")}. ${t("Click a flag to open the country's profile.")}`;
     if ($("grid").querySelector("tr.g-q")) prefetch(cs.map(c => c.iso3));
   }
@@ -164,6 +181,8 @@ try {
   $("grid").addEventListener("click", ev => {
     const cell = ev.target.closest("td.cell");
     if (cell) { tipTarget = cell; tip.pin(qTip(cell), ev); return; }
+    const tot = ev.target.closest("th[data-tip=total]");
+    if (tot) { location.href = pageUrl("country.html", { c: tot.dataset.c, s: sector }); return; }
     const tr = ev.target.closest("tr.g-sec, tr.g-sub"); if (!tr) return;
     const k = tr.dataset.k;
     open.has(k) ? open.delete(k) : open.add(k);
@@ -175,6 +194,13 @@ try {
     const c = meta.byIso.get(el.dataset.c), st = meta.structure[sector];
     const head = `<div class="tt-head">${flagImg(c)}${esc(c.name)}</div>`;
     if (el.dataset.tip === "q") { if (!tip.pinned) tipTarget = el; return qTip(el); }
+    if (el.dataset.tip === "total") {
+      const r = meta.scoreOf(c.iso3, sector, "Total", "all", year) || {};
+      return head + `<div class="tt-muted">${t("All areas")}</div>` +
+        (r.score == null ? `<div>${t("No scored answer")}</div>` : `<div><span class="tt-val">${pct(r.score)}</span> <span class="tt-muted">${t("Score")}</span></div>`) +
+        (r.idk != null ? `<div class="tt-muted">${t("I don't know: {v} of the points", { v: pct(r.idk) })}</div>` : "") +
+        `<div class="tt-q">${t("Click to open the profile")}</div>`;
+    }
     const qs = el.dataset.tip === "sec" ? st.questions.filter(q => q.sec === el.dataset.k) : st.questions.filter(q => q.sub === el.dataset.k);
     const v = avg(qs, c.iso3), cells = qs.map(q => (grid.items[q.id] || {})[c.iso3]).filter(Boolean);
     const label = el.dataset.tip === "sec" ? st.secById.get(el.dataset.k).label : st.subLabel.get(el.dataset.k);
@@ -206,6 +232,26 @@ try {
         "Les deux courbes d'un domaine partagent la même échelle de hauteur ; d'un domaine à l'autre, comparez la forme et la position, pas la hauteur. Avec si peu de pays, lisez les drapeaux plutôt que le contour lissé.")
       : tx("Curve heights are scaled within each row, so compare their shape and position, not their height. With so few countries, read the flags rather than the smooth outline.",
         "La hauteur des courbes est mise à l'échelle dans chaque ligne : comparez leur forme et leur position, pas leur hauteur. Avec si peu de pays, lisez les drapeaux plutôt que le contour lissé.");
+  }
+
+  /* ------------------------------------------------------------ de jure against de facto, area by area */
+  function drawLp() {
+    const areas = ["Total", ...meta.structure[sector].areas], cs = countries();
+    const sc = (c, a, lp) => { const r = meta.scoreOf(c.iso3, sector, a, lp, year); return r && r.score != null ? r.score : null; };
+    const all = areas.map(a => ({ key: a, label: a === "Total" ? t("All areas") : t(a),
+      points: cs.map(c => ({ c, dj: sc(c, a, "de jure"), df: sc(c, a, "de facto") })).filter(d => d.dj != null && d.df != null) }));
+    // an area without de jure or without de facto questions has no chart; the note names it
+    const panels = all.filter(p => p.points.length || p.key === "Total"), none = all.filter(p => !p.points.length && p.key !== "Total");
+    $("lp-sub").textContent = tx("Each flag is a country: its score on the de jure questions against its score on the de facto questions, first for all areas together, then area by area. Below the diagonal, the de facto score is lower than the de jure score.",
+      "Chaque drapeau est un pays : son score sur les questions de jure face à son score sur les questions de facto, d'abord pour l'ensemble des domaines, puis domaine par domaine. Sous la diagonale, le score de facto est inférieur au score de jure.") +
+      (sector === "PFM" ? tx(" For public finances (PFM), the de jure and de facto labels of the questions are still provisional.",
+        " Pour les finances publiques (GFP), la classification de jure et de facto des questions est encore provisoire.") : "");
+    $("lp-legend").innerHTML = `<span class="key"><svg width="24" height="14" aria-hidden="true"><path d="M1,13L23,1V13Z" fill="var(--neg-tint)" stroke="none"/><line x1="1" y1="13" x2="23" y2="1" stroke="var(--ink-2)" stroke-width="1.2"/></svg>${t("De facto below de jure")}</span>`;
+    drawLpScatters($("lpchart"), { panels, highlight: hl, onClick: c => { location.href = pageUrl("country.html", { c: c.iso3, s: sector }); } });
+    $("lp-note").textContent = tx("Countries without both scores in an area are left out of its chart. Click a flag to open the country's profile.",
+      "Les pays sans les deux scores dans un domaine n'apparaissent pas dans son graphique. Cliquez sur un drapeau pour ouvrir le profil du pays.") +
+      (none.length ? " " + tx("No chart for {a}: no country has both a de jure and a de facto score there.", "Pas de graphique pour {a} : aucun pays n'y a à la fois un score de jure et un score de facto.",
+        { a: none.map(p => p.label).join(", ") }) : "");
   }
 
   /* ------------------------------------------------------------ where the answer is "I don't know" */

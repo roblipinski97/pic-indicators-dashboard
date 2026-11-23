@@ -3,7 +3,7 @@
 // the questionnaires by its words. Every figure comes from the data files. If an AI endpoint is set in
 // assets/assistant-config.json, the reader can also send the question and the figures found to it.
 import { d3, loadMeta, loadGrid, getJSON, esc, pct, num, plural, flagImg, svgFlag, scoreColor, dotSvg, answerParts,
-  gradeChip, pageUrl, showError, SECTORS, t, tx, isFr } from "../core.js";
+  gradeChip, pageUrl, showError, SECTORS, t, tx, isFr, isEs } from "../core.js";
 
 const $ = id => document.getElementById(id);
 const fold = s => " " + String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9%\s'-]/g, " ").replace(/\s+/g, " ").trim() + " ";
@@ -12,30 +12,32 @@ const has = (q, w) => q.includes(" " + w + " ");
 // words for the areas of each questionnaire
 const AREA_WORDS = {
   HRM: {
-    "Strategy": ["strategy", "strategic", "legal framework", "kpi", "kpis", "performance targets", "long-term plan", "strategie", "cadre juridique", "objectifs de performance"],
-    "Recruitment": ["recruitment", "recruit", "recruiting", "hiring", "hire", "hired", "merit", "selection", "entry exam", "exams", "job offers", "vacancies", "recrutement", "recruter", "embauche", "concours", "examens", "offres d'emploi"],
-    "Compensation": ["compensation", "pay", "salary", "salaries", "wages", "pay grade", "pay scale", "benefits", "remuneration", "salaire", "salaires", "traitement", "grille", "avantages"],
-    "Promotion": ["promotion", "promotions", "promoted", "career", "avancement", "carriere"],
-    "Performance evaluation": ["performance evaluation", "appraisal", "appraisals", "evaluations", "evaluation", "performance management", "evaluation des performances", "notation"],
-    "Training": ["training", "trained", "learning", "on-the-job", "formation", "formations"],
-    "Dismissal": ["dismissal", "dismiss", "dismissed", "firing", "fired", "exit", "separation", "termination", "licenciement", "revocation", "depart", "cessation"],
-    "Information systems": ["hrmis", "information system", "information systems", "hr data", "payroll", "digital", "data quality", "records", "sigrh", "sirh", "systeme d'information", "systemes d'information", "paie", "donnees rh"]
+    "Strategy": ["estrategia", "estrategico", "marco legal", "marco juridico", "metas de desempeno", "indicadores clave", "strategy", "strategic", "legal framework", "kpi", "kpis", "performance targets", "long-term plan", "strategie", "cadre juridique", "objectifs de performance"],
+    "Recruitment": ["reclutamiento", "contratacion", "seleccion", "merito", "concursos", "examenes", "ofertas de empleo", "vacantes", "ingreso", "recruitment", "recruit", "recruiting", "hiring", "hire", "hired", "merit", "selection", "entry exam", "exams", "job offers", "vacancies", "recrutement", "recruter", "embauche", "concours", "examens", "offres d'emploi"],
+    "Compensation": ["compensacion", "remuneracion", "remuneraciones", "salario", "salarios", "sueldos", "escala salarial", "beneficios", "compensation", "pay", "salary", "salaries", "wages", "pay grade", "pay scale", "benefits", "remuneration", "salaire", "salaires", "traitement", "grille", "avantages"],
+    "Promotion": ["promocion", "promociones", "ascenso", "ascensos", "carrera", "promotion", "promotions", "promoted", "career", "avancement", "carriere"],
+    "Performance evaluation": ["evaluacion del desempeno", "evaluacion de desempeno", "evaluaciones", "desempeno", "performance evaluation", "appraisal", "appraisals", "evaluations", "evaluation", "performance management", "evaluation des performances", "notation"],
+    "Training": ["capacitacion", "formacion", "aprendizaje", "training", "trained", "learning", "on-the-job", "formation", "formations"],
+    "Dismissal": ["desvinculacion", "despido", "despidos", "destitucion", "cese", "dismissal", "dismiss", "dismissed", "firing", "fired", "exit", "separation", "termination", "licenciement", "revocation", "depart", "cessation"],
+    "Information systems": ["sistema de informacion", "sistemas de informacion", "nomina", "planilla", "datos de personal", "hrmis", "information system", "information systems", "hr data", "payroll", "digital", "data quality", "records", "sigrh", "sirh", "systeme d'information", "systemes d'information", "paie", "donnees rh"]
   },
   PFM: {
-    "Planning": ["planning", "fiscal programming", "forecast", "forecasts", "fiscal strategy", "fiscal risks", "medium-term", "macroeconomic", "planification", "programmation budgetaire", "previsions", "strategie budgetaire", "risques budgetaires", "moyen terme"],
-    "Formulation": ["formulation", "budget preparation", "budget calendar", "budget circular", "ceilings", "classification", "budget proposal", "elaboration", "preparation du budget", "calendrier budgetaire", "circulaire budgetaire", "plafonds"],
-    "Approval": ["approval", "legislature", "parliament", "legislative", "budget approval", "adoption", "parlement", "vote du budget"],
-    "Execution": ["execution", "budget execution", "cash", "commitment", "commitments", "payments", "treasury", "internal audit", "arrears", "execution du budget", "tresorerie", "engagements", "paiements", "tresor", "audit interne", "arrieres"],
-    "Reporting and audit": ["reporting", "reports", "audit", "external audit", "supreme audit", "sai", "financial reports", "accounts", "rapports", "audit externe", "cour des comptes", "rapports financiers", "comptes"],
-    "IFMIS": ["ifmis", "financial management information system", "fmis", "siigf", "sigfp"],
-    "Personnel": ["personnel", "staff", "vacancies", "pfm staff", "technical staff", "effectifs", "agents"]
+    "Planning": ["planificacion", "programacion fiscal", "proyecciones", "pronosticos", "estrategia fiscal", "riesgos fiscales", "mediano plazo", "macroeconomicas", "planning", "fiscal programming", "forecast", "forecasts", "fiscal strategy", "fiscal risks", "medium-term", "macroeconomic", "planification", "programmation budgetaire", "previsions", "strategie budgetaire", "risques budgetaires", "moyen terme"],
+    "Formulation": ["formulacion", "preparacion del presupuesto", "calendario presupuestario", "circular presupuestaria", "techos", "clasificacion presupuestaria", "proyecto de presupuesto", "formulation", "budget preparation", "budget calendar", "budget circular", "ceilings", "classification", "budget proposal", "elaboration", "preparation du budget", "calendrier budgetaire", "circulaire budgetaire", "plafonds"],
+    "Approval": ["aprobacion", "poder legislativo", "congreso", "aprobacion del presupuesto", "approval", "legislature", "parliament", "legislative", "budget approval", "adoption", "parlement", "vote du budget"],
+    "Execution": ["ejecucion", "ejecucion presupuestaria", "ejecucion del presupuesto", "caja", "compromisos", "pagos", "tesoreria", "auditoria interna", "atrasos", "execution", "budget execution", "cash", "commitment", "commitments", "payments", "treasury", "internal audit", "arrears", "execution du budget", "tresorerie", "engagements", "paiements", "tresor", "audit interne", "arrieres"],
+    "Reporting and audit": ["informes", "auditoria", "auditoria externa", "entidad fiscalizadora", "efs", "contraloria", "informes financieros", "cuentas", "reporting", "reports", "audit", "external audit", "supreme audit", "sai", "financial reports", "accounts", "rapports", "audit externe", "cour des comptes", "rapports financiers", "comptes"],
+    "IFMIS": ["siaf", "sistema integrado de administracion financiera", "ifmis", "financial management information system", "fmis", "siigf", "sigfp"],
+    "Personnel": ["dotacion", "funcionarios de gfp", "personnel", "staff", "vacancies", "pfm staff", "technical staff", "effectifs", "agents"]
   }
 };
 const SECTOR_WORDS = {
   HRM: ["hrm", "civil service", "civil servants", "public employment", "public servants", "human resource", "human resources", "staff management", "employment",
-    "grh", "fonction publique", "fonctionnaires", "emploi public", "agents publics", "ressources humaines"],
+    "grh", "fonction publique", "fonctionnaires", "emploi public", "agents publics", "ressources humaines",
+    "servicio civil", "funcion publica", "funcionarios", "servidores publicos", "empleo publico", "recursos humanos", "rrhh"],
   PFM: ["pfm", "budget", "budgets", "public finance", "public finances", "fiscal", "financial management", "spending",
-    "gfp", "finances publiques", "budgetaire", "budgetaires", "gestion financiere", "depenses"]
+    "gfp", "finances publiques", "budgetaire", "budgetaires", "gestion financiere", "depenses",
+    "presupuesto", "presupuestos", "finanzas publicas", "presupuestario", "presupuestaria", "gasto"]
 };
 const EXTRA_COUNTRY = { "ivory coast": "CIV", "cote divoire": "CIV", "laos": "LAO", "lao": "LAO", "ghanaian": "GHA", "nigerian": "NGA", "colombian": "COL",
   "brazilian": "BRA", "estonian": "EST", "swedish": "SWE", "malaysian": "MYS", "senegalese": "SEN", "kenyan": "KEN", "moroccan": "MAR", "uzbek": "UZB",
@@ -43,9 +45,14 @@ const EXTRA_COUNTRY = { "ivory coast": "CIV", "cote divoire": "CIV", "laos": "LA
   // French spellings (accents are dropped before matching)
   "rdp lao": "LAO", "bresilien": "BRA", "colombien": "COL", "estonien": "EST", "ghaneen": "GHA", "ivoirien": "CIV", "kenyan": "KEN",
   "laotien": "LAO", "malaisien": "MYS", "marocain": "MAR", "mozambicain": "MOZ", "nigerian": "NGA", "philippin": "PHL", "senegalais": "SEN",
-  "suedois": "SWE", "ouzbek": "UZB", "cambodgien": "KHM", "bangladais": "BGD", "roumain": "ROU" };
+  "suedois": "SWE", "ouzbek": "UZB", "cambodgien": "KHM", "bangladais": "BGD", "roumain": "ROU",
+  // Spanish spellings
+  "costa de marfil": "CIV", "brasileno": "BRA", "colombiano": "COL", "estonio": "EST", "ghanes": "GHA", "marfileno": "CIV", "keniano": "KEN",
+  "laosiano": "LAO", "malasio": "MYS", "marroqui": "MAR", "mozambiqueno": "MOZ", "nigeriano": "NGA", "senegales": "SEN", "sueco": "SWE",
+  "uzbeko": "UZB", "camboyano": "KHM", "bangladesi": "BGD", "rumano": "ROU", "rdp lao": "LAO" };
 const STOP = new Set(("a an the of in on to for and or is are do does did which what where who how many much country countries have has with by be any there their that this it its about tell me show give " +
-  "le la les un une des du de et ou est sont quel quelle quels quelles qui quoi comment combien pays dans sur pour par avec ce cette ces se sa son ses leur leurs au aux en parle moi montre").split(" "));
+  "le la les un une des du de et ou est sont quel quelle quels quelles qui quoi comment combien pays dans sur pour par avec ce cette ces se sa son ses leur leurs au aux en parle moi montre " +
+  "el los las unos unas del cual cuales quien como cuanto cuantos cuantas paises este esta estos estas su sus al lo hay tiene tienen donde dime muestra muestrame hablame").split(" "));
 
 try {
   const meta = await loadMeta();
@@ -56,7 +63,7 @@ try {
   try { config = await getJSON("assets/assistant-config.json"); } catch (e) { config = {}; }
 
   const aliases = [];
-  meta.countries.forEach(c => { aliases.push([fold(c.name).trim(), c]); if (c.name_en) aliases.push([fold(c.name_en).trim(), c]); if (c.name_fr) aliases.push([fold(c.name_fr).trim(), c]); aliases.push([fold(c.id).trim(), c]); aliases.push([c.iso3.toLowerCase(), c]); });
+  meta.countries.forEach(c => { aliases.push([fold(c.name).trim(), c]); if (c.name_en) aliases.push([fold(c.name_en).trim(), c]); if (c.name_fr) aliases.push([fold(c.name_fr).trim(), c]); if (c.name_es) aliases.push([fold(c.name_es).trim(), c]); aliases.push([fold(c.id).trim(), c]); aliases.push([c.iso3.toLowerCase(), c]); });
   Object.entries(EXTRA_COUNTRY).forEach(([a, iso]) => aliases.push([a, meta.byIso.get(iso)]));
   aliases.sort((a, b) => b[0].length - a[0].length);
 
@@ -79,11 +86,11 @@ try {
     }
     for (const s of ["HRM", "PFM"]) if (SECTOR_WORDS[s].some(w => has(q, w)) && !area) sector = s;
     if (!sector && SECTOR_WORDS.PFM.some(w => has(q, w))) sector = "PFM";
-    const lp = /\b(law|laws|legal|de jure|jure|practice|de facto|facto|in practice|gap|droit|loi|lois|juridique|pratique|en pratique|ecart)\b/.test(q) && /\b(practice|de facto|facto|gap|compare|versus|vs|fall|below|lag|pratique|ecart|comparer|sous|inferieur|inferieure|inferieurs)\b/.test(q);
-    const missing = /\b(missing|don't know|dont know|unanswered|no answer|idk|gaps in|je ne sais pas|ne sais pas|sans reponse|manquant|manquantes|lacunes)\b/.test(q);
-    const grades = /\b(grade|grades|quote|quotes|evidence|verified|notes|citation|citations|preuve|preuves)\b/.test(q);
-    const dir = /\b(lowest|least|worst|weakest|fewest|bottom|smallest|less|below|plus bas|plus basse|plus faible|plus faibles|pire|moins|dernier)\b/.test(q) ? "min" : /\b(highest|most|best|strongest|top|greatest|largest|more|plus eleve|plus elevee|plus fort|plus forte|meilleur|meilleure|meilleurs|premier|plus)\b/.test(q) ? "max" : null;
-    const about = /\btell me about\b|\babout\b|\bprofile\b|\bsummary\b|\bhow is\b|\bhow does\b|\bparle moi\b|\bprofil\b|\bresume\b|\bcomment\b/.test(q);
+    const lp = /\b(law|laws|legal|de jure|jure|practice|de facto|facto|in practice|gap|droit|loi|lois|juridique|pratique|en pratique|ecart|ley|leyes|normativa|practica|en la practica|brecha)\b/.test(q) && /\b(practice|de facto|facto|gap|compare|versus|vs|fall|below|lag|pratique|ecart|comparer|sous|inferieur|inferieure|inferieurs|practica|brecha|comparar|frente|debajo|inferior)\b/.test(q);
+    const missing = /\b(missing|don't know|dont know|unanswered|no answer|idk|gaps in|je ne sais pas|ne sais pas|sans reponse|manquant|manquantes|lacunes|no se|sin respuesta|faltantes|vacios)\b/.test(q);
+    const grades = /\b(grade|grades|quote|quotes|evidence|verified|notes|citation|citations|preuve|preuves|calificacion|calificaciones|cita|citas|evidencia|pruebas)\b/.test(q);
+    const dir = /\b(lowest|least|worst|weakest|fewest|bottom|smallest|less|below|plus bas|plus basse|plus faible|plus faibles|pire|moins|dernier|mas bajo|mas baja|mas debil|mas debiles|peor|peores|menor|menos|ultimo)\b/.test(q) ? "min" : /\b(highest|most|best|strongest|top|greatest|largest|more|plus eleve|plus elevee|plus fort|plus forte|meilleur|meilleure|meilleurs|premier|plus|mas alto|mas alta|mas fuerte|mas fuertes|mejor|mejores|mayor|primero|mas)\b/.test(q) ? "max" : null;
+    const about = /\btell me about\b|\babout\b|\bprofile\b|\bsummary\b|\bhow is\b|\bhow does\b|\bparle moi\b|\bprofil\b|\bresume\b|\bcomment\b|\bhablame de\b|\bperfil\b|\bresumen\b|\bcomo le va\b|\bcomo esta\b/.test(q);
     // a single question, matched by its words
     const words = q.split(" ").filter(w => w.length > 3 && !STOP.has(w));
     let match = null;
@@ -93,8 +100,8 @@ try {
           if (qq.type === "text") continue;
           const hay = fold(`${qq.text} ${qq.item || ""}`);
           const hit = words.filter(w => hay.includes(" " + w) || hay.includes(w + " ")).length;
-          const lawWord = words.some(w => /^(requir|legal|law|mandat|exig|loi|jurid|oblig)/.test(w)), pracWord = words.some(w => /^(practice|actual|often|usual|pratiq|frequen|habitu)/.test(w));
-          const bonus = (lawWord && /legal|law|mandat|loi|jurid|oblig/.test(hay) ? 1 : 0) + (pracWord && /in practice|how often|en pratique|frequence/.test(hay) ? 1 : 0);
+          const lawWord = words.some(w => /^(requir|legal|law|mandat|exig|loi|jurid|oblig|ley|norma)/.test(w)), pracWord = words.some(w => /^(practice|actual|often|usual|pratiq|frequen|habitu|practic|frecuen)/.test(w));
+          const bonus = (lawWord && /legal|law|mandat|loi|jurid|oblig|ley|norma/.test(hay) ? 1 : 0) + (pracWord && /in practice|how often|en pratique|frequence|en la practica|con que frecuencia/.test(hay) ? 1 : 0);
           const sc = (hit + bonus) / Math.sqrt(words.length) + (qq.item ? -0.15 : 0);
           if (hit >= 2 && (!match || sc > match.sc)) match = { q: qq, s, sc, hit, strength: hit + bonus };
         }
@@ -139,7 +146,7 @@ try {
     const say = s => { out.html += `<p>${s}</p>`; out.facts.push(s.replace(/<[^>]+>/g, "")); };
     const sector = P.sector || "HRM";
     const mid = s => `${SECTORS[s].name.toLowerCase()} (${SECTORS[s].short})`;   // a questionnaire's name inside a sentence
-    const ar = a => (isFr() ? t(a).toLowerCase() : a.toLowerCase());               // an area's name inside a sentence
+    const ar = a => (isFr() || isEs() ? t(a).toLowerCase() : a.toLowerCase());     // an area's name inside a sentence
     const pool = s => { const cs = current(s); P.countries.forEach(c => { if (c.runs[s] && !cs.includes(c)) cs.push(c); }); return cs; };
     const older = () => "";
 
@@ -235,7 +242,8 @@ try {
     const me = P.countries.length === 1 ? cs.find(r => r.c === P.countries[0]) : null;
     if (me) {
       const rank = [...cs].sort((a, b) => b.v - a.v).indexOf(me) + 1;
-      const rk = tx(rank === 1 ? "the highest" : `${rank}${rank === 2 ? "nd" : rank === 3 ? "rd" : "th"}`, rank === 1 ? "le plus élevé" : `${rank}e`);
+      const rk = isEs() ? (rank === 1 ? "el más alto" : `${rank}.º`) :
+        tx(rank === 1 ? "the highest" : `${rank}${rank === 2 ? "nd" : rank === 3 ? "rd" : "th"}`, rank === 1 ? "le plus élevé" : `${rank}e`);
       say(`${flagImg(me.c)} <b>${esc(me.c.name)}</b>${older(me.c, s)} ` + tx("scores <b>{v}</b> on {l}: {rk} of {n} countries. The median is {m}.", "obtient <b>{v}</b> en {l} : {rk} sur {n} pays. La médiane est de {m}.",
         { v: pct(me.v), l: esc(label), rk, n: cs.length, m: pct(d3.median(cs, r => r.v)) }));
     } else if (P.countries.length >= 2) {
@@ -254,7 +262,15 @@ try {
   }
 
   /* ---------------------------------------------- the conversation */
-  const examples = isFr() ? [
+  const examples = isEs() ? [
+    "¿Dónde es más fuerte el reclutamiento?",
+    "¿Cómo le va a Ghana en ejecución presupuestaria?",
+    "¿Dónde queda el puntaje de facto más por debajo del de jure?",
+    "¿Qué países tienen una función de auditoría interna operativa?",
+    "¿Dónde es más frecuente «No sé» en finanzas públicas?",
+    "Comparar Colombia y Brasil en SIAF",
+    "Háblame de Senegal"
+  ] : isFr() ? [
     "Où le recrutement est-il le plus fort ?",
     "Comment se situe le Ghana en exécution du budget ?",
     "Où le score de facto est-il le plus en dessous du score de jure ?",

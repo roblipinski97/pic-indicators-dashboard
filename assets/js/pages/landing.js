@@ -2,7 +2,7 @@
 // click the figure), how to read the results, what the pipeline could not answer and de jure against de facto
 // (a second scrolling story), the two questionnaires and the comparison with other datasets.
 import { d3, loadMeta, getJSON, pal, onColours, svgFlag, withTip, pct, num, esc, flagImg, pageUrl, countryMenu,
-  plural, showError, cssVar, SECTORS, sectorIcon, sectorLabel, lineIcon, segmented, t, tx, isFr } from "../core.js";
+  plural, showError, cssVar, SECTORS, sectorIcon, sectorLabel, lineIcon, segmented, t, tx, isFr, isEs } from "../core.js";
 import { hexMap } from "../charts/hexmap.js";
 
 const $ = id => document.getElementById(id);
@@ -83,7 +83,7 @@ try {
     "North America", "South Asia", "Sub-Saharan Africa"];
   const inReg = r => C.filter(c => c.region === r).map(c => c.name).sort((a, b) => a.localeCompare(b));
   const nReg = WB7.filter(r => inReg(r).length).length;
-  const word = k => (isFr() ? ["zéro", "une", "deux", "trois", "quatre", "cinq", "six", "sept"] : ["no", "one", "two", "three", "four", "five", "six", "seven"])[k];
+  const word = k => (isFr() ? ["zéro", "une", "deux", "trois", "quatre", "cinq", "six", "sept"] : isEs() ? ["ninguna", "una", "dos", "tres", "cuatro", "cinco", "seis", "siete"] : ["no", "one", "two", "three", "four", "five", "six", "seven"])[k];
   $("map-text").innerHTML = `<div class="map-text"><h2>${tx("{n} pilot countries", "{n} pays pilotes", { n: C.length })}</h2>
     <p>${nReg === WB7.length
       ? tx("The PIC Indicators project is being piloted in {n} countries across all seven World Bank regions.", "Le projet des indicateurs PIC est testé dans {n} pays, dans les sept régions de la Banque mondiale.", { n: C.length })
@@ -93,12 +93,12 @@ try {
   document.querySelectorAll("[data-icon]").forEach(el => { el.innerHTML = lineIcon(el.dataset.icon, 34); });
   // ?map=caribbean adds the Caribbean countries, to test how the map handles many small islands
   const test = new URLSearchParams(location.search).get("map") === "caribbean" || window.PIC_MAP_TEST === "caribbean";
-  const CARIB = [["ATG", "ag", "Antigua and Barbuda", "Antigua-et-Barbuda"], ["BHS", "bs", "The Bahamas", "Bahamas"],
-    ["BRB", "bb", "Barbados", "Barbade"], ["BLZ", "bz", "Belize", "Belize"], ["DMA", "dm", "Dominica", "Dominique"],
-    ["DOM", "do", "Dominican Republic", "République dominicaine"], ["GRD", "gd", "Grenada", "Grenade"], ["GUY", "gy", "Guyana", "Guyana"],
-    ["HTI", "ht", "Haiti", "Haïti"], ["JAM", "jm", "Jamaica", "Jamaïque"], ["KNA", "kn", "St. Kitts and Nevis", "Saint-Kitts-et-Nevis"],
-    ["LCA", "lc", "St. Lucia", "Sainte-Lucie"], ["SUR", "sr", "Suriname", "Suriname"], ["TTO", "tt", "Trinidad and Tobago", "Trinité-et-Tobago"],
-    ["VCT", "vc", "St. Vincent and the Grenadines", "Saint-Vincent-et-les-Grenadines"]];
+  const CARIB = [["ATG", "ag", "Antigua and Barbuda", "Antigua-et-Barbuda", "Antigua y Barbuda"], ["BHS", "bs", "The Bahamas", "Bahamas", "Bahamas"],
+    ["BRB", "bb", "Barbados", "Barbade", "Barbados"], ["BLZ", "bz", "Belize", "Belize", "Belice"], ["DMA", "dm", "Dominica", "Dominique", "Dominica"],
+    ["DOM", "do", "Dominican Republic", "République dominicaine", "República Dominicana"], ["GRD", "gd", "Grenada", "Grenade", "Granada"], ["GUY", "gy", "Guyana", "Guyana", "Guyana"],
+    ["HTI", "ht", "Haiti", "Haïti", "Haití"], ["JAM", "jm", "Jamaica", "Jamaïque", "Jamaica"], ["KNA", "kn", "St. Kitts and Nevis", "Saint-Kitts-et-Nevis", "Saint Kitts y Nevis"],
+    ["LCA", "lc", "St. Lucia", "Sainte-Lucie", "Santa Lucía"], ["SUR", "sr", "Suriname", "Suriname", "Suriname"], ["TTO", "tt", "Trinidad and Tobago", "Trinité-et-Tobago", "Trinidad y Tobago"],
+    ["VCT", "vc", "St. Vincent and the Grenadines", "Saint-Vincent-et-les-Grenadines", "San Vicente y las Granadinas"]];
   const has = c => Object.keys(c.runs || {}).length > 0;
   const marks = C.map(c => ({
     iso3: c.iso3, c,
@@ -107,8 +107,8 @@ try {
     click: has(c) ? () => { location.href = pageUrl("country.html", { c: c.iso3 }); } : null
   }));
   if (test) {
-    CARIB.forEach(([iso3, iso2, en, fr]) => {
-      const c = { iso3, iso2, name: isFr() ? fr : en };
+    CARIB.forEach(([iso3, iso2, en, fr, es]) => {
+      const c = { iso3, iso2, name: isFr() ? fr : isEs() ? es : en };
       marks.push({ iso3, c, click: null,
         tip: () => `<div class="tt-head">${flagImg(c)}${esc(c.name)}</div><div class="tt-muted">${tx("Test only: not a pilot country", "Test uniquement : pas un pays pilote")}</div>` });
     });
@@ -195,13 +195,11 @@ try {
   const range = s => { const [lo, h] = ext(idkN.filter(n => n.s === s), "idk"); return tx("from <b>{a}</b> in {ca} to <b>{b}</b> in {cb}", "de <b>{a}</b> ({ca}) à <b>{b}</b> ({cb})", { a: pct(lo.idk), ca: esc(lo.c.name), b: pct(h.idk), cb: esc(h.c.name) }); };
   const med = lp => d3.median(meta.scores.filter(r => r.year === year && r.area === "Total" && r.lp === lp && r.idk != null), r => r.idk);
   const below = s => { const ns = lpN.filter(n => n.s === s); return tx("<b>{a} of {b}</b>", "<b>{a} sur {b}</b>", { a: ns.filter(n => n.df < n.dj).length, b: ns.length }); };
-  const pfmDj = meta.structure.PFM.questions.filter(q => q.lp === "de jure" && q.points > 0).length;
-  const pfmScored = meta.structure.PFM.questions.filter(q => q.points > 0).length;
   const steps = [
     { h: tx("De facto scores often fall below de jure scores", "Les scores de facto sont souvent inférieurs aux scores de jure"),
-      p: tx(`Each flag is a country: its score on de jure items against its score on de facto items. Below the line, the de facto score is lower: in {hrm} countries for public employment (HRM) and {pfm} for public finances (PFM), where only {pdj} of the {ps} scored questions are de jure. <a href="country.html">Open a country's profile</a> to see the questions behind each score.`,
-        `Chaque drapeau est un pays : son score sur les questions de jure face à son score sur les questions de facto. Sous la diagonale, le score de facto est plus faible : dans {hrm} pays pour l'emploi public (GRH) et {pfm} pour les finances publiques (GFP), où seules {pdj} des {ps} questions notées sont de jure. <a href="country.html">Ouvrez le profil d'un pays</a> pour voir les questions derrière chaque score.`,
-        { hrm: below("HRM"), pfm: below("PFM"), pdj: pfmDj, ps: pfmScored }) },
+      p: tx(`Each flag is a country: its score on de jure items against its score on de facto items. Below the line, the de facto score is lower: in {hrm} countries for public employment (HRM) and {pfm} for public finances (PFM), where the de jure and de facto labels of the questions are still provisional. <a href="country.html">Open a country's profile</a> to see the questions behind each score.`,
+        `Chaque drapeau est un pays : son score sur les questions de jure face à son score sur les questions de facto. Sous la diagonale, le score de facto est plus faible : dans {hrm} pays pour l'emploi public (GRH) et {pfm} pour les finances publiques (GFP), où la classification de jure et de facto des questions est encore provisoire. <a href="country.html">Ouvrez le profil d'un pays</a> pour voir les questions derrière chaque score.`,
+        { hrm: below("HRM"), pfm: below("PFM") }) },
     { h: tx("How often the answer is \"I don't know\"", "À quelle fréquence la réponse est « Je ne sais pas »"),
       p: tx(`Share of the questions asked that the pipeline answered "I don't know": {hrm} for public employment (HRM), and {pfm} for public finances (PFM). Most of them are de facto questions: in the middle country, {df} of the de facto points are "I don't know", against {dj} of the de jure points.`,
         `Part des questions posées auxquelles le pipeline a répondu « Je ne sais pas » : {hrm} pour l'emploi public (GRH), et {pfm} pour les finances publiques (GFP). La plupart sont des questions de facto : dans le pays médian, {df} des points de facto sont « Je ne sais pas », contre {dj} des points de jure.`,

@@ -33,7 +33,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-57254d94ebbe2dc345c060e7ec3c8d4b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-1c4dbd4f07cf220f8bc20a692e4821e9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "language": {
     "search-no-results-text": "No results",
@@ -78,10 +78,10 @@ ul.task-list li input[type="checkbox"] {
     t = q && q.get("theme");
     if (t !== "dark" && t !== "light") { try { t = localStorage.getItem("pic-theme"); } catch (e) {} }
     document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
-    // language: English unless French was chosen (?lang=fr, or remembered)
+    // language: English unless French or Spanish was chosen (?lang=fr / ?lang=es, or remembered)
     var l = q && q.get("lang");
-    if (l !== "fr" && l !== "en") { try { l = localStorage.getItem("pic-lang"); } catch (e) {} }
-    if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.setAttribute("lang", "fr"); }
+    if (l !== "fr" && l !== "en" && l !== "es") { try { l = localStorage.getItem("pic-lang"); } catch (e) {} }
+    if (l === "fr" || l === "es") { document.documentElement.dataset.lang = l; document.documentElement.setAttribute("lang", l); }
     // inside a frame (e.g. a claude.ai artifact) downloads are usually blocked: hide those buttons
     var framed = true;
     try { framed = window.self !== window.top; } catch (e) {}
@@ -159,17 +159,17 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<!-- Text in both languages: lang="en" and lang="fr" blocks, the stylesheet shows the reader's language -->
+<!-- Text in three languages: lang="en", lang="fr" and lang="es" blocks (Spanish: preliminary translation), the stylesheet shows the reader's language -->
 <section class="hero">
   <div class="pic-page hero-inner">
     <div>
-      <span class="hero-tag"><span lang="en">Pilot data, 2026</span><span lang="fr">Données pilotes, 2026</span></span>
-      <h1><span lang="en">Public Institutions' Capacity Indicators</span><span lang="fr">Indicateurs de capacité des institutions publiques</span></h1>
+      <span class="hero-tag"><span lang="en">Pilot data, 2026</span><span lang="fr">Données pilotes, 2026</span><span lang="es">Datos piloto, 2026</span></span>
+      <h1><span lang="en">Public Institutions' Capacity Indicators</span><span lang="fr">Indicateurs de capacité des institutions publiques</span><span lang="es">Indicadores de Capacidad de las Instituciones Públicas</span></h1>
       <p class="hero-lede" lang="en">The project harnesses growing AI capabilities to assess how public institutions across the globe are managed, both in law and in practice. Its methodology opens up new ways of measuring that are more frequent, specialized and flexible, while remaining rigorously verified and tied to outputs that policy can act on.</p>
-      <p class="hero-lede" lang="fr">Le projet tire parti des capacités croissantes de l'IA pour évaluer la manière dont les institutions publiques du monde entier sont gérées, en droit comme en pratique. La méthodologie ouvre de nouvelles possibilités de mesure, plus fréquentes, plus spécialisées et plus souples, tout en restant rigoureusement vérifiée et liée à des résultats directement utiles à l'action publique.</p>
+      <p class="hero-lede" lang="fr">Le projet tire parti des capacités croissantes de l'IA pour évaluer la manière dont les institutions publiques du monde entier sont gérées, en droit comme en pratique. La méthodologie ouvre de nouvelles possibilités de mesure, plus fréquentes, plus spécialisées et plus souples, tout en restant rigoureusement vérifiée et liée à des résultats directement utiles à l'action publique.</p><p class="hero-lede" lang="es">El proyecto aprovecha las crecientes capacidades de la IA para evaluar cómo se gestionan las instituciones públicas en todo el mundo, tanto en la ley como en la práctica. Su metodología abre nuevas formas de medir más frecuentes, especializadas y flexibles, rigurosamente verificadas y vinculadas a resultados sobre los que la política pública puede actuar.</p>
       <div class="hero-actions">
-        <div class="jump"><span id="jump-label"><span lang="en">Go to a country</span><span lang="fr">Aller à un pays</span></span><div id="jump"></div></div>
-        <a class="btn-quiet" href="#methodology"><span lang="en">How the answers are found</span><span lang="fr">Comment les réponses sont trouvées</span></a>
+        <div class="jump"><span id="jump-label"><span lang="en">Go to a country</span><span lang="fr">Aller à un pays</span><span lang="es">Ir a un país</span></span><div id="jump"></div></div>
+        <a class="btn-quiet" href="#methodology"><span lang="en">How the answers are found</span><span lang="fr">Comment les réponses sont trouvées</span><span lang="es">Cómo se encuentran las respuestas</span></a>
       </div>
     </div>
     <dl class="hero-stats" id="hero-stats"></dl>
@@ -183,68 +183,68 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="pic-page">
   <section class="home-section" id="why">
-    <h2><span lang="en">Project rationale</span><span lang="fr">Raison d'être du projet</span></h2>
+    <h2><span lang="en">Project rationale</span><span lang="fr">Raison d'être du projet</span><span lang="es">Justificación del proyecto</span></h2>
     <p class="lede" lang="en">Current sets of indicators of institutional capacity tend to be either broad or in-depth (see the <a href="#datasets">comparison below</a>). The broad measures are updated frequently and are often global in scope, but they offer only a bird's-eye view of each government. The in-depth measures offer a far more granular view, including from the perspective of individual institutions or civil servants, but they are collected less often and for smaller samples of countries. The PIC Indicators aim to combine the advantages of both, providing semi-automated, evidence-based diagnoses of institutional capacity at the desired institutional level.</p>
-    <p class="lede" lang="fr">Les ensembles d'indicateurs actuels consacrés à la capacité institutionnelle sont généralement soit larges, soit approfondis (voir la <a href="#datasets">comparaison plus bas</a>). Les mesures larges sont mises à jour fréquemment et souvent mondiales, mais n'offrent qu'une vue d'ensemble de chaque administration. Les mesures approfondies offrent une vision bien plus fine, y compris du point de vue des institutions ou des fonctionnaires eux-mêmes, mais elles sont recueillies moins souvent et pour des échantillons de pays plus restreints. Les indicateurs PIC visent à combiner les avantages des deux, en fournissant des diagnostics semi-automatisés et fondés sur des preuves de la capacité institutionnelle, au niveau institutionnel souhaité.</p>
+    <p class="lede" lang="fr">Les ensembles d'indicateurs actuels consacrés à la capacité institutionnelle sont généralement soit larges, soit approfondis (voir la <a href="#datasets">comparaison plus bas</a>). Les mesures larges sont mises à jour fréquemment et souvent mondiales, mais n'offrent qu'une vue d'ensemble de chaque administration. Les mesures approfondies offrent une vision bien plus fine, y compris du point de vue des institutions ou des fonctionnaires eux-mêmes, mais elles sont recueillies moins souvent et pour des échantillons de pays plus restreints. Les indicateurs PIC visent à combiner les avantages des deux, en fournissant des diagnostics semi-automatisés et fondés sur des preuves de la capacité institutionnelle, au niveau institutionnel souhaité.</p><p class="lede" lang="es">Los conjuntos actuales de indicadores de capacidad institucional suelen ser amplios o en profundidad (véase la <a href="#datasets">comparación más abajo</a>). Las medidas amplias se actualizan con frecuencia y suelen tener alcance mundial, pero solo ofrecen una visión de conjunto de cada gobierno. Las medidas en profundidad ofrecen una visión mucho más detallada, incluso desde la perspectiva de instituciones o servidores públicos concretos, pero se recopilan con menos frecuencia y para muestras más pequeñas de países. Los Indicadores PIC buscan combinar las ventajas de ambas y ofrecer diagnósticos semiautomatizados y basados en evidencia de la capacidad institucional, al nivel institucional deseado.</p>
     <p class="lede" lang="en">The project rests on the following key principles:</p>
-    <p class="lede" lang="fr">Le projet repose sur les principes clés suivants&nbsp;:</p>
+    <p class="lede" lang="fr">Le projet repose sur les principes clés suivants&nbsp;:</p><p class="lede" lang="es">El proyecto se basa en los siguientes principios clave:</p>
     <div class="rationale-box principles">
       <div>
-        <div class="box-head"><span class="box-icon" data-icon="evidence"></span><h3><span lang="en">Evidence first</span><span lang="fr">Les preuves d'abord</span></h3></div>
+        <div class="box-head"><span class="box-icon" data-icon="evidence"></span><h3><span lang="en">Evidence first</span><span lang="fr">Les preuves d'abord</span><span lang="es">Primero, la evidencia</span></h3></div>
         <p lang="en">Every answer comes with the document it rests on and the passage quoted from it. The code checks that the quote is in the document word for word, and a grade says how strong the evidence is. A reviewer can see in seconds why an answer was given.</p>
-        <p lang="fr">Chaque réponse est accompagnée du document sur lequel elle repose et du passage qui en est cité. Le code vérifie que la citation figure mot pour mot dans le document, et une note indique la solidité de la preuve. Un examinateur voit en quelques secondes pourquoi une réponse a été donnée.</p>
+        <p lang="fr">Chaque réponse est accompagnée du document sur lequel elle repose et du passage qui en est cité. Le code vérifie que la citation figure mot pour mot dans le document, et une note indique la solidité de la preuve. Un examinateur voit en quelques secondes pourquoi une réponse a été donnée.</p><p lang="es">Cada respuesta viene acompañada del documento en que se basa y del pasaje citado. El código comprueba que la cita figura en el documento palabra por palabra, y una calificación indica la solidez de la evidencia. Un revisor puede ver en segundos por qué se dio una respuesta.</p>
       </div>
       <div>
-        <div class="box-head"><span class="box-icon" data-icon="action"></span><h3><span lang="en">Actionable</span><span lang="fr">Utile à l'action</span></h3></div>
+        <div class="box-head"><span class="box-icon" data-icon="action"></span><h3><span lang="en">Actionable</span><span lang="fr">Utile à l'action</span><span lang="es">Orientado a la acción</span></h3></div>
         <p lang="en">The questions concern processes and practices that the government or institution concerned is able to adjust so that they follow best practice, as established by academic and empirical evidence.</p>
-        <p lang="fr">Les questions portent sur des processus et des pratiques que l'administration ou l'institution concernée est en mesure d'ajuster pour suivre les meilleures pratiques, telles qu'établies par la recherche et les données empiriques.</p>
+        <p lang="fr">Les questions portent sur des processus et des pratiques que l'administration ou l'institution concernée est en mesure d'ajuster pour suivre les meilleures pratiques, telles qu'établies par la recherche et les données empiriques.</p><p lang="es">Las preguntas se refieren a procesos y prácticas que el gobierno o la institución en cuestión puede ajustar para que sigan las buenas prácticas, según lo establecido por la evidencia académica y empírica.</p>
       </div>
       <div>
-        <div class="box-head"><span class="box-icon" data-icon="frontier"></span><h3><span lang="en">Methodological frontier</span><span lang="fr">À la pointe de la méthode</span></h3></div>
+        <div class="box-head"><span class="box-icon" data-icon="frontier"></span><h3><span lang="en">Methodological frontier</span><span lang="fr">À la pointe de la méthode</span><span lang="es">Frontera metodológica</span></h3></div>
         <p lang="en">The approach joins a growing number of academic and institutional studies that use AI to collect global and country-level institutional indicators, including on fiscal policy (<a href="https://www.imf.org/en/publications/wp/issues/2026/03/07/ai-meets-fiscal-policy-mapping-government-spending-actions-across-64-countries-574286" target="_blank" rel="noopener">IMF 2026</a>), industrial policy (<a href="https://www.nber.org/papers/w33814" target="_blank" rel="noopener">Fang et al. 2025</a>) and housing regulation (<a href="https://doi.org/10.2139/ssrn.4627587" target="_blank" rel="noopener">Bartik et al. 2025</a>).</p>
-        <p lang="fr">L'approche s'inscrit dans un nombre croissant de travaux universitaires et institutionnels qui utilisent l'IA pour recueillir des indicateurs institutionnels mondiaux et nationaux, notamment sur la politique budgétaire (<a href="https://www.imf.org/en/publications/wp/issues/2026/03/07/ai-meets-fiscal-policy-mapping-government-spending-actions-across-64-countries-574286" target="_blank" rel="noopener">FMI 2026</a>), les politiques industrielles (<a href="https://www.nber.org/papers/w33814" target="_blank" rel="noopener">Fang et al. 2025</a>) et la réglementation du logement (<a href="https://doi.org/10.2139/ssrn.4627587" target="_blank" rel="noopener">Bartik et al. 2025</a>).</p>
+        <p lang="fr">L'approche s'inscrit dans un nombre croissant de travaux universitaires et institutionnels qui utilisent l'IA pour recueillir des indicateurs institutionnels mondiaux et nationaux, notamment sur la politique budgétaire (<a href="https://www.imf.org/en/publications/wp/issues/2026/03/07/ai-meets-fiscal-policy-mapping-government-spending-actions-across-64-countries-574286" target="_blank" rel="noopener">FMI 2026</a>), les politiques industrielles (<a href="https://www.nber.org/papers/w33814" target="_blank" rel="noopener">Fang et al. 2025</a>) et la réglementation du logement (<a href="https://doi.org/10.2139/ssrn.4627587" target="_blank" rel="noopener">Bartik et al. 2025</a>).</p><p lang="es">El enfoque se suma a un número creciente de estudios académicos e institucionales que usan IA para recopilar indicadores institucionales mundiales y por país, por ejemplo sobre política fiscal (<a href="https://www.imf.org/en/publications/wp/issues/2026/03/07/ai-meets-fiscal-policy-mapping-government-spending-actions-across-64-countries-574286" target="_blank" rel="noopener">FMI 2026</a>), política industrial (<a href="https://www.nber.org/papers/w33814" target="_blank" rel="noopener">Fang et al. 2025</a>) y regulación de la vivienda (<a href="https://doi.org/10.2139/ssrn.4627587" target="_blank" rel="noopener">Bartik et al. 2025</a>).</p>
       </div>
       <div>
-        <div class="box-head"><span class="box-icon" data-icon="automation"></span><h3><span lang="en">Automation with human controls</span><span lang="fr">Automatisation sous contrôle humain</span></h3></div>
+        <div class="box-head"><span class="box-icon" data-icon="automation"></span><h3><span lang="en">Automation with human controls</span><span lang="fr">Automatisation sous contrôle humain</span><span lang="es">Automatización con controles humanos</span></h3></div>
         <p lang="en">The project collects information on institutional capacity through an AI-enabled pipeline that locates the relevant country and institution documents and scans them for relevant information. This allows data to be collected at global scale every year, following the same set of objective principles. The approach can easily be adapted to other sectors and operational needs. The outputs are validated against double-coded human responses and then spot-checked for accuracy.</p>
-        <p lang="fr">Le projet recueille des informations sur la capacité institutionnelle au moyen d'un pipeline fondé sur l'IA, qui repère les documents pertinents de chaque pays et institution et y recherche les informations utiles. Cela permet une collecte de données à l'échelle mondiale chaque année, selon les mêmes principes objectifs. L'approche s'adapte facilement à d'autres secteurs et à d'autres besoins opérationnels. Les résultats sont validés par comparaison avec des réponses codées deux fois par des personnes, puis vérifiés par sondage.</p>
+        <p lang="fr">Le projet recueille des informations sur la capacité institutionnelle au moyen d'un pipeline fondé sur l'IA, qui repère les documents pertinents de chaque pays et institution et y recherche les informations utiles. Cela permet une collecte de données à l'échelle mondiale chaque année, selon les mêmes principes objectifs. L'approche s'adapte facilement à d'autres secteurs et à d'autres besoins opérationnels. Les résultats sont validés par comparaison avec des réponses codées deux fois par des personnes, puis vérifiés par sondage.</p><p lang="es">El proyecto recopila información sobre la capacidad institucional mediante un pipeline basado en IA que localiza los documentos pertinentes del país y de la institución y busca en ellos la información relevante. Esto permite recopilar datos a escala mundial cada año, siguiendo el mismo conjunto de principios objetivos. El enfoque puede adaptarse fácilmente a otros sectores y necesidades operativas. Los resultados se validan con respuestas humanas de doble codificación y luego se verifican por muestreo.</p>
       </div>
       <div>
-        <div class="box-head"><span class="box-icon" data-icon="dejure"></span><h3><span lang="en">De jure vs de facto items</span><span lang="fr">Questions de jure et de facto</span></h3></div>
+        <div class="box-head"><span class="box-icon" data-icon="dejure"></span><h3><span lang="en">De jure vs de facto items</span><span lang="fr">Questions de jure et de facto</span><span lang="es">Preguntas de jure y de facto</span></h3></div>
         <p lang="en">The project distinguishes between capacity-enhancing laws and regulations and their implementation in daily practice. Many questions therefore come in pairs: what the law requires (de jure) and what evidence there is that it is followed in practice (de facto). Public documents mostly describe the rules, so a de facto question gets an answer only when an assessment, audit or report shows how the rule is implemented.</p>
-        <p lang="fr">Le projet distingue les lois et règlements qui renforcent la capacité de leur mise en œuvre au quotidien. De nombreuses questions vont donc par paires : ce que la loi exige (de jure) et les preuves qu'elle est appliquée en pratique (de facto). Les documents publics décrivent surtout les règles ; une question de facto n'obtient donc une réponse que lorsqu'une évaluation, un audit ou un rapport montre comment la règle est appliquée.</p>
+        <p lang="fr">Le projet distingue les lois et règlements qui renforcent la capacité de leur mise en œuvre au quotidien. De nombreuses questions vont donc par paires : ce que la loi exige (de jure) et les preuves qu'elle est appliquée en pratique (de facto). Les documents publics décrivent surtout les règles ; une question de facto n'obtient donc une réponse que lorsqu'une évaluation, un audit ou un rapport montre comment la règle est appliquée.</p><p lang="es">El proyecto distingue entre las leyes y regulaciones que refuerzan la capacidad y su aplicación en la práctica diaria. Por eso muchas preguntas van en pares: lo que exige la ley (de jure) y qué evidencia hay de que se cumple en la práctica (de facto). Los documentos públicos describen sobre todo las reglas, así que una pregunta de facto solo obtiene respuesta cuando una evaluación, una auditoría o un informe muestra cómo se aplica la regla.</p>
       </div>
       <div>
-        <div class="box-head"><span class="box-icon" data-icon="chatbot"></span><h3><span lang="en">Why not just ask a chatbot?</span><span lang="fr">Pourquoi ne pas simplement interroger un assistant conversationnel ?</span></h3></div>
+        <div class="box-head"><span class="box-icon" data-icon="chatbot"></span><h3><span lang="en">Why not just ask a chatbot?</span><span lang="fr">Pourquoi ne pas simplement interroger un assistant conversationnel ?</span><span lang="es">¿Por qué no preguntar simplemente a un chatbot?</span></h3></div>
         <p lang="en">A web chatbot answers almost every question, but without a checked quote, without a grade for its evidence, and often with a different answer each time it is asked. In the pipeline, chatbot answers are only the last resort, and they go through the same rigorous verification.</p>
-        <p lang="fr">Un assistant conversationnel en ligne répond à presque toutes les questions, mais sans citation vérifiée, sans note pour ses preuves, et souvent avec une réponse différente à chaque fois qu'on l'interroge. Dans le pipeline, ses réponses ne sont qu'un dernier recours, et elles passent par la même vérification rigoureuse.</p>
+        <p lang="fr">Un assistant conversationnel en ligne répond à presque toutes les questions, mais sans citation vérifiée, sans note pour ses preuves, et souvent avec une réponse différente à chaque fois qu'on l'interroge. Dans le pipeline, ses réponses ne sont qu'un dernier recours, et elles passent par la même vérification rigoureuse.</p><p lang="es">Un chatbot web responde casi todas las preguntas, pero sin una cita verificada, sin una calificación de su evidencia y, a menudo, con una respuesta distinta cada vez que se le pregunta. En el pipeline, las respuestas de chatbot son solo el último recurso y pasan por la misma verificación rigurosa.</p>
       </div>
     </div>
   </section>
 
   <section class="home-section" id="questionnaires">
-    <h2><span lang="en">What the questionnaires ask</span><span lang="fr">Ce que demandent les questionnaires</span></h2>
+    <h2><span lang="en">What the questionnaires ask</span><span lang="fr">Ce que demandent les questionnaires</span><span lang="es">Qué preguntan los cuestionarios</span></h2>
     <p class="lede" lang="en">The pilot of the PIC Indicators is built around two questionnaires, on public employment (HRM) and public finances (PFM), originally written for government experts and answered here from public documents. Both follow the life cycle of their administrative processes and ask about the laws and practices that the literature has linked to public sector capacity.</p>
-    <p class="lede" lang="fr">La phase pilote des indicateurs PIC s'articule autour de deux questionnaires, sur l'emploi public (GRH) et les finances publiques (GFP), rédigés à l'origine pour des experts de l'administration et remplis ici à partir de documents publics. Tous deux suivent le cycle de vie des processus administratifs concernés et portent sur les lois et les pratiques que la littérature associe à la capacité du secteur public.</p>
+    <p class="lede" lang="fr">La phase pilote des indicateurs PIC s'articule autour de deux questionnaires, sur l'emploi public (GRH) et les finances publiques (GFP), rédigés à l'origine pour des experts de l'administration et remplis ici à partir de documents publics. Tous deux suivent le cycle de vie des processus administratifs concernés et portent sur les lois et les pratiques que la littérature associe à la capacité du secteur public.</p><p class="lede" lang="es">El piloto de los Indicadores PIC se basa en dos cuestionarios, sobre empleo público (GRH) y finanzas públicas (GFP), redactados originalmente para expertos gubernamentales y respondidos aquí a partir de documentos públicos. Ambos siguen el ciclo de vida de sus procesos administrativos y preguntan por las leyes y prácticas que la literatura ha vinculado con la capacidad del sector público.</p>
     <div class="two-col" id="qcards"></div>
   </section>
 </div>
 
 <section class="method-sec" id="methodology">
   <div class="pic-page home-section method-head">
-    <h2><span lang="en">Methodology</span><span lang="fr">Méthodologie</span></h2>
+    <h2><span lang="en">Methodology</span><span lang="fr">Méthodologie</span><span lang="es">Metodología</span></h2>
     <p class="lede" lang="en">The PIC Indicators project uses a data collection pipeline to answer the questionnaires, followed by comparisons and verification by human reviewers. The details can be found in the <a href="assets/docs/PIC_Indicators_LLMSS_paper_draft.pdf" target="_blank" rel="noopener">PIC working paper</a>, prepared for the LLMSS conference held at the City University of Hong Kong in October 2026.</p>
-    <p class="lede" lang="fr">Le projet des indicateurs PIC utilise un pipeline de collecte de données pour répondre aux questionnaires, suivi de comparaisons et d'une vérification par des examinateurs. Les détails figurent dans le <a href="assets/docs/PIC_Indicators_LLMSS_paper_draft.pdf" target="_blank" rel="noopener">document de travail PIC</a>, préparé pour la conférence LLMSS tenue à la City University of Hong Kong en octobre 2026.</p>
+    <p class="lede" lang="fr">Le projet des indicateurs PIC utilise un pipeline de collecte de données pour répondre aux questionnaires, suivi de comparaisons et d'une vérification par des examinateurs. Les détails figurent dans le <a href="assets/docs/PIC_Indicators_LLMSS_paper_draft.pdf" target="_blank" rel="noopener">document de travail PIC</a>, préparé pour la conférence LLMSS tenue à la City University of Hong Kong en octobre 2026.</p><p class="lede" lang="es">El proyecto de los Indicadores PIC usa un pipeline de recopilación de datos para responder los cuestionarios, seguido de comparaciones y de la verificación por revisores humanos. Los detalles figuran en el <a href="assets/docs/PIC_Indicators_LLMSS_paper_draft.pdf" target="_blank" rel="noopener">documento de trabajo de PIC</a>, preparado para la conferencia LLMSS celebrada en la City University of Hong Kong en octubre de 2026.</p>
   </div>
 </section>
 
 <section class="scrolly" id="pipeline">
   <div class="scrolly-sticky">
-    <div class="scrolly-text"><div class="step-cards" id="pcards" aria-live="polite"></div><div class="step-dots" id="pdots" role="group" aria-label="Stages of the pipeline" data-fr-aria-label="Étapes du pipeline"></div></div>
+    <div class="scrolly-text"><div class="step-cards" id="pcards" aria-live="polite"></div><div class="step-dots" id="pdots" role="group" aria-label="Stages of the pipeline" data-fr-aria-label="Étapes du pipeline" data-es-aria-label="Etapas del pipeline"></div></div>
     <div class="scrolly-graphic">
       <div>
         <div class="pipe-frame" id="pipe-frame">
-          <img src="assets/img/pipeline.png" alt="The six stages of the PIC pipeline: acquire and index documents, retrieve passages, read and vote, verify, recover evidence, and export the pre-filled questionnaire for expert review." data-fr-alt="Les six étapes du pipeline PIC : acquérir et indexer les documents, retrouver les passages, lire et voter, vérifier, récupérer des preuves et exporter le questionnaire prérempli pour examen par des experts.">
+          <img src="assets/img/pipeline.png" alt="The six stages of the PIC pipeline: acquire and index documents, retrieve passages, read and vote, verify, recover evidence, and export the pre-filled questionnaire for expert review." data-fr-alt="Les six étapes du pipeline PIC : acquérir et indexer les documents, retrouver les passages, lire et voter, vérifier, récupérer des preuves et exporter le questionnaire prérempli pour examen par des experts." data-es-alt="Las seis etapas del pipeline de PIC: obtener e indexar documentos, recuperar pasajes, leer y votar, verificar, recuperar evidencia y exportar el cuestionario precompletado para su revisión por expertos.">
           <svg class="pipe-shade" id="pipe-shade" viewbox="0 0 1200 462" preserveaspectratio="none"></svg>
         </div>
       </div>
@@ -255,11 +255,11 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="pic-page">
   <section class="home-section" id="video">
-    <h2><span lang="en">The pipeline at work</span><span lang="fr">Le pipeline à l'œuvre</span></h2>
+    <h2><span lang="en">The pipeline at work</span><span lang="fr">Le pipeline à l'œuvre</span><span lang="es">El pipeline en acción</span></h2>
     <p class="lede" lang="en">The animation below follows one example question through every stage of the pipeline: from the documents found, through the selection of the right passages, to finding and scoring the final answer.</p>
-    <p class="lede" lang="fr">L'animation ci-dessous suit une question d'exemple à travers toutes les étapes du pipeline : des documents trouvés à la sélection des bons passages, jusqu'à la réponse finale et à son score.</p>
+    <p class="lede" lang="fr">L'animation ci-dessous suit une question d'exemple à travers toutes les étapes du pipeline : des documents trouvés à la sélection des bons passages, jusqu'à la réponse finale et à son score.</p><p class="lede" lang="es">La animación siguiente acompaña una pregunta de ejemplo por todas las etapas del pipeline: desde los documentos encontrados, pasando por la selección de los pasajes adecuados, hasta encontrar y puntuar la respuesta final.</p>
     <figure class="video-fig figure">
-      <video controls="" preload="metadata" playsinline="" width="1920" height="1080" poster="assets/video/pic-pipeline-v13.jpg" aria-label="Video: one question followed through the six stages of the PIC pipeline" data-fr-aria-label="Vidéo : une question suivie à travers les six étapes du pipeline PIC">
+      <video controls="" preload="metadata" playsinline="" width="1920" height="1080" poster="assets/video/pic-pipeline-v13.jpg" aria-label="Video: one question followed through the six stages of the PIC pipeline" data-fr-aria-label="Vidéo : une question suivie à travers les six étapes du pipeline PIC" data-es-aria-label="Video: una pregunta seguida a través de las seis etapas del pipeline de PIC">
         <source src="assets/video/pic-pipeline-v13.mp4" type="video/mp4">
         <a href="assets/video/pic-pipeline-v13.mp4">Open the video (MP4, 7.6 MB)</a>
       </video>
@@ -267,17 +267,17 @@ ul.task-list li input[type="checkbox"] {
   </section>
 
   <section class="home-section" id="scores">
-    <h2><span lang="en">How to read the results</span><span lang="fr">Comment lire les résultats</span></h2>
+    <h2><span lang="en">How to read the results</span><span lang="fr">Comment lire les résultats</span><span lang="es">Cómo leer los resultados</span></h2>
     <p class="lede" lang="en">Each question is assigned one of a set of pre-defined responses. Additional rules then set out what each selected response, and their aggregation, implies about a country's institutional capacity.</p>
-    <p class="lede" lang="fr">Chaque question reçoit l'une des réponses prédéfinies. Des règles supplémentaires précisent ensuite ce que chaque réponse retenue, et leur agrégation, impliquent pour la capacité institutionnelle d'un pays.</p>
+    <p class="lede" lang="fr">Chaque question reçoit l'une des réponses prédéfinies. Des règles supplémentaires précisent ensuite ce que chaque réponse retenue, et leur agrégation, impliquent pour la capacité institutionnelle d'un pays.</p><p class="lede" lang="es">A cada pregunta se le asigna una de un conjunto de respuestas predefinidas. Reglas adicionales establecen luego lo que cada respuesta seleccionada, y su agregación, implica sobre la capacidad institucional de un país.</p>
     <div class="rationale-box">
       <div>
-        <h3><span lang="en">Scoring</span><span lang="fr">Notation</span></h3>
-        <p lang="en">For most questions, each response is mapped to a score between 0 and 1, with a higher number indicating a regulatory arrangement or practice deemed more conducive to efficient public sector management. A country's score in an area is the points earned divided by the points possible, leaving out the questions answered "I don't know". Questions closed by an earlier answer (a "No" to the parent question) count as zero. In public employment (HRM), where several questions ask about the same practice, only the best answer counts (for key performance indicators, the best four). De jure and de facto scores are the same score, calculated on the questions about the law and on those about practice.</p>
-        <p lang="fr">Pour la plupart des questions, chaque réponse correspond à un score entre 0 et 1 ; plus le score est élevé, plus le dispositif réglementaire ou la pratique est jugé favorable à une gestion efficace du secteur public. Le score d'un pays dans un domaine correspond aux points obtenus divisés par les points possibles, sans les questions répondues « Je ne sais pas ». Les questions fermées par une réponse précédente (un « Non » à la question parente) comptent pour zéro. Pour l'emploi public (HRM), lorsque plusieurs questions portent sur la même pratique, seule la meilleure réponse compte (pour les indicateurs de performance, les quatre meilleures). Les scores de jure et de facto sont le même score, calculé sur les questions portant sur le droit et sur celles portant sur la pratique.</p>
+        <h3><span lang="en">Scoring</span><span lang="fr">Notation</span><span lang="es">Puntaje</span></h3>
+        <p lang="en">For most questions, each response is mapped to a score between 0 and 1, with a higher number indicating a regulatory arrangement or practice deemed more conducive to efficient public sector management. A country's score in an area is the points earned divided by the points possible, leaving out the questions answered "I don't know". Questions closed by an earlier answer (a "No" to the parent question) count as zero. In public employment (HRM), where several questions ask about the same practice, only the best answer counts (for key performance indicators, the best four). De jure and de facto scores are the same score, calculated on the questions about the law and on those about practice. Both questionnaires are scored with the rules of their scoring workbooks (public employment: workbook 4; public finances: workbook 1), which also say which questions are de jure; a few public finance questions are scored by the number of options ticked, or by bands of a number such as the months a report takes.</p>
+        <p lang="fr">Pour la plupart des questions, chaque réponse correspond à un score entre 0 et 1 ; plus le score est élevé, plus le dispositif réglementaire ou la pratique est jugé favorable à une gestion efficace du secteur public. Le score d'un pays dans un domaine correspond aux points obtenus divisés par les points possibles, sans les questions répondues « Je ne sais pas ». Les questions fermées par une réponse précédente (un « Non » à la question parente) comptent pour zéro. Pour l'emploi public (HRM), lorsque plusieurs questions portent sur la même pratique, seule la meilleure réponse compte (pour les indicateurs de performance, les quatre meilleures). Les scores de jure et de facto sont le même score, calculé sur les questions portant sur le droit et sur celles portant sur la pratique. Les deux questionnaires sont notés selon les règles de leurs classeurs de notation (emploi public : classeur 4 ; finances publiques : classeur 1), qui indiquent aussi quelles questions sont de jure ; quelques questions sur les finances publiques sont notées selon le nombre d'options cochées, ou par tranches d'un nombre, comme le nombre de mois que prend un rapport.</p><p lang="es">En la mayoría de las preguntas, cada respuesta corresponde a un puntaje entre 0 y 1; un número más alto indica un arreglo normativo o una práctica que se considera más propicia para una gestión eficiente del sector público. El puntaje de un país en un área son los puntos obtenidos divididos entre los puntos posibles, sin las preguntas respondidas «No sé». Las preguntas cerradas por una respuesta anterior (un «No» a la pregunta principal) cuentan como cero. En empleo público (GRH), cuando varias preguntas se refieren a la misma práctica, solo cuenta la mejor respuesta (en los indicadores clave de desempeño, las cuatro mejores). Los puntajes de jure y de facto son el mismo puntaje, calculado sobre las preguntas relativas a la ley y sobre las relativas a la práctica. Los dos cuestionarios se puntúan con las reglas de sus libros de puntuación (empleo público: libro 4; finanzas públicas: libro 1), que también indican qué preguntas son de jure; algunas preguntas de finanzas públicas se puntúan según el número de opciones marcadas, o por tramos de un número, como los meses que tarda un informe.</p>
       </div>
       <div>
-        <h3><span lang="en">Evidence grades</span><span lang="fr">Notes des preuves</span></h3>
+        <h3><span lang="en">Evidence grades</span><span lang="fr">Notes des preuves</span><span lang="es">Calificaciones de la evidencia</span></h3>
         <ul class="grades" lang="en">
           <li><b>A</b>: a quote found word for word in a strong, recent source.</li>
           <li><b>B</b>: a quote found in the documents, but the source is weaker or older, or a check was not conclusive.</li>
@@ -289,12 +289,12 @@ ul.task-list li input[type="checkbox"] {
           <li><b>B</b> : une citation trouvée dans les documents, mais la source est plus fragile ou plus ancienne, ou une vérification n'a pas été concluante.</li>
           <li><b>C</b> : aucun document ; la suggestion des modèles.</li>
           <li><b>D</b> : pas de réponse.</li>
-        </ul>
+        </ul><ul class="grades" lang="es"> <li><b>A</b>: una cita encontrada palabra por palabra en una fuente sólida y reciente.</li> <li><b>B</b>: una cita encontrada en los documentos, pero la fuente es más débil o más antigua, o una verificación no fue concluyente.</li> <li><b>C</b>: sin documento; la sugerencia propia de los modelos.</li> <li><b>D</b>: sin respuesta.</li></ul>
       </div>
       <div>
-        <h3><span lang="en">Abstention ("I don't know" answers)</span><span lang="fr">Abstention (réponses « Je ne sais pas »)</span></h3>
+        <h3><span lang="en">Abstention ("I don't know" answers)</span><span lang="fr">Abstention (réponses « Je ne sais pas »)</span><span lang="es">Abstención (respuestas «No sé»)</span></h3>
         <p lang="en">Where the pipeline could not find an answer, "I don't know" (IDK) is shown, not hidden. A country with many IDK answers therefore has a score that rests on fewer questions. The share of points answered "I don't know" is given next to every score.</p>
-        <p lang="fr">Lorsque le pipeline n'a pas trouvé de réponse, « Je ne sais pas » est affiché, pas caché. Un pays avec beaucoup de réponses « Je ne sais pas » a donc un score qui repose sur moins de questions. La part des points en « Je ne sais pas » figure à côté de chaque score.</p>
+        <p lang="fr">Lorsque le pipeline n'a pas trouvé de réponse, « Je ne sais pas » est affiché, pas caché. Un pays avec beaucoup de réponses « Je ne sais pas » a donc un score qui repose sur moins de questions. La part des points en « Je ne sais pas » figure à côté de chaque score.</p><p lang="es">Cuando el pipeline no pudo encontrar una respuesta, se muestra «No sé», no se oculta. Por eso, un país con muchas respuestas «No sé» tiene un puntaje que descansa en menos preguntas. La proporción de puntos respondidos «No sé» figura junto a cada puntaje.</p>
       </div>
     </div>
   </section>
@@ -302,7 +302,7 @@ ul.task-list li input[type="checkbox"] {
 
 <section class="scrolly" id="story">
   <div class="scrolly-sticky">
-    <div class="scrolly-text"><div class="step-cards" id="cards" aria-live="polite"></div><div class="step-dots" id="dots" role="group" aria-label="Steps of the story" data-fr-aria-label="Étapes du récit"></div></div>
+    <div class="scrolly-text"><div class="step-cards" id="cards" aria-live="polite"></div><div class="step-dots" id="dots" role="group" aria-label="Steps of the story" data-fr-aria-label="Étapes du récit" data-es-aria-label="Pasos del relato"></div></div>
     <div class="scrolly-graphic"><div class="scrolly-frame"><div class="scrolly-svg" id="stage"></div></div></div>
   </div>
   <div class="scrolly-steps" id="steps" aria-hidden="true"></div>
@@ -310,9 +310,9 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="pic-page">
   <section class="home-section" id="datasets">
-    <h2><span lang="en">How PIC compares with other measures</span><span lang="fr">PIC et les autres mesures</span></h2>
+    <h2><span lang="en">How PIC compares with other measures</span><span lang="fr">PIC et les autres mesures</span><span lang="es">Cómo se compara PIC con otras medidas</span></h2>
     <p class="lede" lang="en">The table below lists the main datasets measuring the quality of public administration and public finances, comparing where their data come from, what they cover and how often they are updated. Click a name to open the dataset's website.</p>
-    <p class="lede" lang="fr">Le tableau ci-dessous présente les principaux jeux de données mesurant la qualité de l'administration publique et des finances publiques, en comparant l'origine de leurs données, ce qu'ils couvrent et leur fréquence de mise à jour. Cliquez sur un nom pour ouvrir le site du jeu de données.</p>
+    <p class="lede" lang="fr">Le tableau ci-dessous présente les principaux jeux de données mesurant la qualité de l'administration publique et des finances publiques, en comparant l'origine de leurs données, ce qu'ils couvrent et leur fréquence de mise à jour. Cliquez sur un nom pour ouvrir le site du jeu de données.</p><p class="lede" lang="es">La tabla siguiente enumera los principales conjuntos de datos que miden la calidad de la administración pública y de las finanzas públicas, y compara de dónde proceden sus datos, qué abarcan y con qué frecuencia se actualizan. Haga clic en un nombre para abrir el sitio web del conjunto de datos.</p>
     <div class="ds-wrap">
       
 <table id="ds" class="ds caption-top table" data-quarto-postprocess="true">
@@ -326,194 +326,194 @@ ul.task-list li input[type="checkbox"] {
 </colgroup>
 <thead>
 <tr class="header">
-<th data-quarto-table-cell-role="th" style="width: 15%"><span lang="en">Dataset</span><span lang="fr">Jeu de données</span></th>
-<th data-quarto-table-cell-role="th" style="width: 18%">Source</th>
-<th data-quarto-table-cell-role="th" style="width: 13%"><span lang="en">Unit</span><span lang="fr">Unité</span></th>
-<th data-quarto-table-cell-role="th" style="width: 10%"><span lang="en">How often</span><span lang="fr">Fréquence</span></th>
-<th data-quarto-table-cell-role="th" style="width: 31%"><span lang="en">Sectors covered</span><span lang="fr">Secteurs couverts</span></th>
-<th data-quarto-table-cell-role="th" style="width: 13%"><span lang="en">Countries</span><span lang="fr">Pays</span></th>
+<th data-quarto-table-cell-role="th" style="width: 15%"><span lang="en">Dataset</span><span lang="fr">Jeu de données</span><span lang="es">Conjunto de datos</span></th>
+<th data-quarto-table-cell-role="th" style="width: 18%"><span lang="en">Source</span><span lang="fr">Source</span><span lang="es">Fuente</span></th>
+<th data-quarto-table-cell-role="th" style="width: 13%"><span lang="en">Unit</span><span lang="fr">Unité</span><span lang="es">Unidad</span></th>
+<th data-quarto-table-cell-role="th" style="width: 10%"><span lang="en">How often</span><span lang="fr">Fréquence</span><span lang="es">Frecuencia</span></th>
+<th data-quarto-table-cell-role="th" style="width: 31%"><span lang="en">Sectors covered</span><span lang="fr">Secteurs couverts</span><span lang="es">Sectores abarcados</span></th>
+<th data-quarto-table-cell-role="th" style="width: 13%"><span lang="en">Countries</span><span lang="fr">Pays</span><span lang="es">Países</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="ds-pic odd">
-<td><span class="ds-name">PIC</span><span class="ds-full"><span lang="en">Public Institutions' Capacity Indicators</span><span lang="fr">Indicateurs de capacité des institutions publiques</span></span><span class="ds-by"><span lang="en">World Bank</span><span lang="fr">Banque mondiale</span></span></td>
-<td><span lang="en">Public documents read by an AI pipeline; follow-up survey of civil service leaders</span><span lang="fr">Documents publics lus par un pipeline d'IA ; enquête complémentaire auprès des dirigeants de la fonction publique</span></td>
-<td><span lang="en">National governments; later also organizations within them and sub-national governments</span><span lang="fr">Administrations nationales ; plus tard aussi leurs organismes et les administrations infranationales</span></td>
-<td><span lang="en">Every 1–2 years</span><span lang="fr">Tous les 1 à 2 ans</span></td>
+<td><span class="ds-name">PIC</span><span class="ds-full"><span lang="en">Public Institutions' Capacity Indicators</span><span lang="fr">Indicateurs de capacité des institutions publiques</span><span lang="es">Indicadores de Capacidad de las Instituciones Públicas</span></span><span class="ds-by"><span lang="en">World Bank</span><span lang="fr">Banque mondiale</span><span lang="es">Banco Mundial</span></span></td>
+<td><span lang="en">Public documents read by an AI pipeline; follow-up survey of civil service leaders</span><span lang="fr">Documents publics lus par un pipeline d'IA ; enquête complémentaire auprès des dirigeants de la fonction publique</span><span lang="es">Documentos públicos leídos por un pipeline de IA; encuesta complementaria a directivos del servicio civil</span></td>
+<td><span lang="en">National governments; later also organizations within them and sub-national governments</span><span lang="fr">Administrations nationales ; plus tard aussi leurs organismes et les administrations infranationales</span><span lang="es">Gobiernos nacionales; más adelante también organizaciones dentro de ellos y gobiernos subnacionales</span></td>
+<td><span lang="en">Every 1–2 years</span><span lang="fr">Tous les 1 à 2 ans</span><span lang="es">Cada 1–2 años</span></td>
 <td><ul>
-<li><span lang="en">Public employment (HRM)</span><span lang="fr">Emploi public (GRH)</span></li>
-<li><span lang="en">Public finances (PFM)</span><span lang="fr">Finances publiques (GFP)</span></li>
-<li><span lang="en">Revenue mobilization (planned)</span><span lang="fr">Mobilisation des recettes (prévu)</span></li>
-<li><span lang="en">Property rights and rule-based governance (planned)</span><span lang="fr">Droits de propriété et gouvernance fondée sur des règles (prévu)</span></li>
-<li><span lang="en">Transparency, accountability and corruption (planned)</span><span lang="fr">Transparence, redevabilité et corruption (prévu)</span></li>
-<li><span lang="en">Service delivery (planned)</span><span lang="fr">Prestation de services (prévu)</span></li>
+<li><span lang="en">Public employment (HRM)</span><span lang="fr">Emploi public (GRH)</span><span lang="es">Empleo público (GRH)</span></li>
+<li><span lang="en">Public finances (PFM)</span><span lang="fr">Finances publiques (GFP)</span><span lang="es">Finanzas públicas (GFP)</span></li>
+<li><span lang="en">Revenue mobilization (planned)</span><span lang="fr">Mobilisation des recettes (prévu)</span><span lang="es">Movilización de ingresos (prevista)</span></li>
+<li><span lang="en">Property rights and rule-based governance (planned)</span><span lang="fr">Droits de propriété et gouvernance fondée sur des règles (prévu)</span><span lang="es">Derechos de propiedad y gobernanza basada en reglas (prevista)</span></li>
+<li><span lang="en">Transparency, accountability and corruption (planned)</span><span lang="fr">Transparence, redevabilité et corruption (prévu)</span><span lang="es">Transparencia, rendición de cuentas y corrupción (prevista)</span></li>
+<li><span lang="en">Service delivery (planned)</span><span lang="fr">Prestation de services (prévu)</span><span lang="es">Prestación de servicios (prevista)</span></li>
 </ul></td>
-<td><span lang="en">18 pilot countries; full data collection from 2027</span><span lang="fr">18 pays pilotes ; collecte complète à partir de 2027</span></td>
+<td><span lang="en">18 pilot countries; full data collection from 2027</span><span lang="fr">18 pays pilotes ; collecte complète à partir de 2027</span><span lang="es">18 países piloto; recopilación completa de datos a partir de 2027</span></td>
 </tr>
 <tr class="ds-group even">
-<td colspan="6"><span lang="en">Broad: frequent and global, but a bird's-eye view</span><span lang="fr">Larges : fréquentes et mondiales, mais vues de loin</span></td>
+<td colspan="6"><span lang="en">Broad: frequent and global, but a bird's-eye view</span><span lang="fr">Larges : fréquentes et mondiales, mais vues de loin</span><span lang="es">Amplias: frecuentes y mundiales, pero una visión de conjunto</span></td>
 </tr>
 <tr class="odd">
-<td><a href="https://www.worldbank.org/en/publication/worldwide-governance-indicators" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">WGI</span><span class="ds-full">Worldwide Governance Indicators</span></a><span class="ds-by"><span lang="en">World Bank</span><span lang="fr">Banque mondiale</span></span></td>
-<td><span lang="en">Combines existing indices built on expert assessments and household and firm surveys</span><span lang="fr">Combine des indices existants fondés sur des évaluations d'experts et des enquêtes auprès des ménages et des entreprises</span></td>
-<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span></td>
-<td><span lang="en">Every year</span><span lang="fr">Chaque année</span></td>
+<td><a href="https://www.worldbank.org/en/publication/worldwide-governance-indicators" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">WGI</span><span class="ds-full">Worldwide Governance Indicators</span></a><span class="ds-by"><span lang="en">World Bank</span><span lang="fr">Banque mondiale</span><span lang="es">Banco Mundial</span></span></td>
+<td><span lang="en">Combines existing indices built on expert assessments and household and firm surveys</span><span lang="fr">Combine des indices existants fondés sur des évaluations d'experts et des enquêtes auprès des ménages et des entreprises</span><span lang="es">Combina índices existentes basados en evaluaciones de expertos y en encuestas de hogares y empresas</span></td>
+<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span><span lang="es">Gobiernos nacionales</span></td>
+<td><span lang="en">Every year</span><span lang="fr">Chaque année</span><span lang="es">Cada año</span></td>
 <td><ul>
-<li><span lang="en">Voice and accountability</span><span lang="fr">Voix et redevabilité</span></li>
-<li><span lang="en">Political stability</span><span lang="fr">Stabilité politique</span></li>
-<li><span lang="en">Government effectiveness</span><span lang="fr">Efficacité des pouvoirs publics</span></li>
-<li><span lang="en">Regulatory quality</span><span lang="fr">Qualité de la réglementation</span></li>
-<li><span lang="en">Rule of law</span><span lang="fr">État de droit</span></li>
-<li><span lang="en">Control of corruption</span><span lang="fr">Maîtrise de la corruption</span></li>
+<li><span lang="en">Voice and accountability</span><span lang="fr">Voix et redevabilité</span><span lang="es">Voz y rendición de cuentas</span></li>
+<li><span lang="en">Political stability</span><span lang="fr">Stabilité politique</span><span lang="es">Estabilidad política</span></li>
+<li><span lang="en">Government effectiveness</span><span lang="fr">Efficacité des pouvoirs publics</span><span lang="es">Efectividad del gobierno</span></li>
+<li><span lang="en">Regulatory quality</span><span lang="fr">Qualité de la réglementation</span><span lang="es">Calidad regulatoria</span></li>
+<li><span lang="en">Rule of law</span><span lang="fr">État de droit</span><span lang="es">Estado de derecho</span></li>
+<li><span lang="en">Control of corruption</span><span lang="fr">Maîtrise de la corruption</span><span lang="es">Control de la corrupción</span></li>
 </ul></td>
-<td class="num"><span lang="en">213 countries and territories</span><span lang="fr">213 pays et territoires</span></td>
+<td class="num"><span lang="en">213 countries and territories</span><span lang="fr">213 pays et territoires</span><span lang="es">213 países y territorios</span></td>
 </tr>
 <tr class="even">
-<td><a href="https://databank.worldbank.org/source/country-policy-and-institutional-assessment" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">CPIA</span><span class="ds-full">Country Policy and Institutional Assessment</span></a><span class="ds-by"><span lang="en">World Bank</span><span lang="fr">Banque mondiale</span></span></td>
-<td><span lang="en">Ratings by World Bank country teams, with a written justification</span><span lang="fr">Notes attribuées par les équipes pays de la Banque mondiale, avec une justification écrite</span></td>
-<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span></td>
-<td><span lang="en">Every year</span><span lang="fr">Chaque année</span></td>
+<td><a href="https://databank.worldbank.org/source/country-policy-and-institutional-assessment" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">CPIA</span><span class="ds-full">Country Policy and Institutional Assessment</span></a><span class="ds-by"><span lang="en">World Bank</span><span lang="fr">Banque mondiale</span><span lang="es">Banco Mundial</span></span></td>
+<td><span lang="en">Ratings by World Bank country teams, with a written justification</span><span lang="fr">Notes attribuées par les équipes pays de la Banque mondiale, avec une justification écrite</span><span lang="es">Calificaciones de los equipos de país del Banco Mundial, con una justificación escrita</span></td>
+<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span><span lang="es">Gobiernos nacionales</span></td>
+<td><span lang="en">Every year</span><span lang="fr">Chaque année</span><span lang="es">Cada año</span></td>
 <td><ul>
-<li><span lang="en">Public administration</span><span lang="fr">Administration publique</span></li>
-<li><span lang="en">Budget and financial management</span><span lang="fr">Gestion budgétaire et financière</span></li>
-<li><span lang="en">Revenue mobilization</span><span lang="fr">Mobilisation des recettes</span></li>
-<li><span lang="en">Property rights and rule-based governance</span><span lang="fr">Droits de propriété et gouvernance fondée sur des règles</span></li>
-<li><span lang="en">Transparency, accountability and corruption</span><span lang="fr">Transparence, redevabilité et corruption</span></li>
+<li><span lang="en">Public administration</span><span lang="fr">Administration publique</span><span lang="es">Administración pública</span></li>
+<li><span lang="en">Budget and financial management</span><span lang="fr">Gestion budgétaire et financière</span><span lang="es">Presupuesto y gestión financiera</span></li>
+<li><span lang="en">Revenue mobilization</span><span lang="fr">Mobilisation des recettes</span><span lang="es">Movilización de ingresos</span></li>
+<li><span lang="en">Property rights and rule-based governance</span><span lang="fr">Droits de propriété et gouvernance fondée sur des règles</span><span lang="es">Derechos de propiedad y gobernanza basada en reglas</span></li>
+<li><span lang="en">Transparency, accountability and corruption</span><span lang="fr">Transparence, redevabilité et corruption</span><span lang="es">Transparencia, rendición de cuentas y corrupción</span></li>
 </ul></td>
-<td class="num"><span lang="en">83 countries</span><span lang="fr">83 pays</span></td>
+<td class="num"><span lang="en">83 countries</span><span lang="fr">83 pays</span><span lang="es">83 países</span></td>
 </tr>
 <tr class="odd">
-<td><a href="https://index.bsg.ox.ac.uk/" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">BIPA</span><span class="ds-full">Blavatnik Index of Public Administration</span></a><span class="ds-by"><span lang="en">University of Oxford</span><span lang="fr">Université d'Oxford</span></span></td>
-<td><span lang="en">Combines existing governance and related indices</span><span lang="fr">Combine des indices existants sur la gouvernance et des sujets proches</span></td>
-<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span></td>
-<td><span lang="en">Varies</span><span lang="fr">Variable</span></td>
+<td><a href="https://index.bsg.ox.ac.uk/" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">BIPA</span><span class="ds-full">Blavatnik Index of Public Administration</span></a><span class="ds-by"><span lang="en">University of Oxford</span><span lang="fr">Université d'Oxford</span><span lang="es">Universidad de Oxford</span></span></td>
+<td><span lang="en">Combines existing governance and related indices</span><span lang="fr">Combine des indices existants sur la gouvernance et des sujets proches</span><span lang="es">Combina índices existentes de gobernanza y afines</span></td>
+<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span><span lang="es">Gobiernos nacionales</span></td>
+<td><span lang="en">Varies</span><span lang="fr">Variable</span><span lang="es">Variable</span></td>
 <td><ul>
-<li><span lang="en">Strategy and leadership</span><span lang="fr">Stratégie et leadership</span></li>
-<li><span lang="en">Public policy</span><span lang="fr">Politiques publiques</span></li>
-<li><span lang="en">National delivery</span><span lang="fr">Mise en œuvre nationale</span></li>
-<li><span lang="en">People and processes</span><span lang="fr">Personnes et processus</span></li>
+<li><span lang="en">Strategy and leadership</span><span lang="fr">Stratégie et leadership</span><span lang="es">Estrategia y liderazgo</span></li>
+<li><span lang="en">Public policy</span><span lang="fr">Politiques publiques</span><span lang="es">Políticas públicas</span></li>
+<li><span lang="en">National delivery</span><span lang="fr">Mise en œuvre nationale</span><span lang="es">Ejecución nacional</span></li>
+<li><span lang="en">People and processes</span><span lang="fr">Personnes et processus</span><span lang="es">Personas y procesos</span></li>
 </ul></td>
-<td class="num"><span lang="en">120 countries and territories</span><span lang="fr">120 pays et territoires</span></td>
+<td class="num"><span lang="en">120 countries and territories</span><span lang="fr">120 pays et territoires</span><span lang="es">120 países y territorios</span></td>
 </tr>
 <tr class="even">
-<td><a href="https://www.worldbank.org/en/programs/govtech/gtmi" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">GTMI</span><span class="ds-full">GovTech Maturity Index</span></a><span class="ds-by"><span lang="en">World Bank</span><span lang="fr">Banque mondiale</span></span></td>
-<td><span lang="en">Survey of governments, with other information</span><span lang="fr">Enquête auprès des administrations, complétée par d'autres informations</span></td>
-<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span></td>
-<td><span lang="en">Every 2–3 years</span><span lang="fr">Tous les 2 à 3 ans</span></td>
+<td><a href="https://www.worldbank.org/en/programs/govtech/gtmi" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">GTMI</span><span class="ds-full">GovTech Maturity Index</span></a><span class="ds-by"><span lang="en">World Bank</span><span lang="fr">Banque mondiale</span><span lang="es">Banco Mundial</span></span></td>
+<td><span lang="en">Survey of governments, with other information</span><span lang="fr">Enquête auprès des administrations, complétée par d'autres informations</span><span lang="es">Encuesta a los gobiernos, con otra información</span></td>
+<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span><span lang="es">Gobiernos nacionales</span></td>
+<td><span lang="en">Every 2–3 years</span><span lang="fr">Tous les 2 à 3 ans</span><span lang="es">Cada 2–3 años</span></td>
 <td><ul>
-<li><span lang="en">Digital government (GovTech)</span><span lang="fr">Administration numérique (GovTech)</span></li>
+<li><span lang="en">Digital government (GovTech)</span><span lang="fr">Administration numérique (GovTech)</span><span lang="es">Gobierno digital (GovTech)</span></li>
 </ul></td>
-<td class="num"><span lang="en">198 countries and territories</span><span lang="fr">198 pays et territoires</span></td>
+<td class="num"><span lang="en">198 countries and territories</span><span lang="fr">198 pays et territoires</span><span lang="es">198 países y territorios</span></td>
 </tr>
 <tr class="odd">
-<td><a href="https://www.worldbank.org/en/programs/global-initiative-on-public-administration-reform/wwbi" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">WWBI</span><span class="ds-full">Worldwide Bureaucracy Indicators</span></a><span class="ds-by"><span lang="en">World Bank</span><span lang="fr">Banque mondiale</span></span></td>
-<td><span lang="en">Labor force surveys</span><span lang="fr">Enquêtes sur la population active</span></td>
-<td><span lang="en">National governments; organizations within them</span><span lang="fr">Administrations nationales ; leurs organismes</span></td>
-<td><span lang="en">Every few years, as country sources allow</span><span lang="fr">Tous les quelques ans, selon les sources nationales</span></td>
+<td><a href="https://www.worldbank.org/en/programs/global-initiative-on-public-administration-reform/wwbi" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">WWBI</span><span class="ds-full">Worldwide Bureaucracy Indicators</span></a><span class="ds-by"><span lang="en">World Bank</span><span lang="fr">Banque mondiale</span><span lang="es">Banco Mundial</span></span></td>
+<td><span lang="en">Labor force surveys</span><span lang="fr">Enquêtes sur la population active</span><span lang="es">Encuestas de fuerza laboral</span></td>
+<td><span lang="en">National governments; organizations within them</span><span lang="fr">Administrations nationales ; leurs organismes</span><span lang="es">Gobiernos nacionales; organizaciones dentro de ellos</span></td>
+<td><span lang="en">Every few years, as country sources allow</span><span lang="fr">Tous les quelques ans, selon les sources nationales</span><span lang="es">Cada pocos años, según lo permitan las fuentes de cada país</span></td>
 <td><ul>
-<li><span lang="en">Public sector employment and pay</span><span lang="fr">Emploi et rémunération dans le secteur public</span></li>
+<li><span lang="en">Public sector employment and pay</span><span lang="fr">Emploi et rémunération dans le secteur public</span><span lang="es">Empleo y salarios en el sector público</span></li>
 </ul></td>
-<td class="num"><span lang="en">202 countries and territories</span><span lang="fr">202 pays et territoires</span></td>
+<td class="num"><span lang="en">202 countries and territories</span><span lang="fr">202 pays et territoires</span><span lang="es">202 países y territorios</span></td>
 </tr>
 <tr class="ds-group even">
-<td colspan="6"><span lang="en">Deep: detailed and actionable, but costly and infrequent</span><span lang="fr">Approfondies : détaillées et utiles à l'action, mais coûteuses et peu fréquentes</span></td>
+<td colspan="6"><span lang="en">Deep: detailed and actionable, but costly and infrequent</span><span lang="fr">Approfondies : détaillées et utiles à l'action, mais coûteuses et peu fréquentes</span><span lang="es">En profundidad: detalladas y orientadas a la acción, pero costosas y poco frecuentes</span></td>
 </tr>
 <tr class="odd">
-<td><a href="https://www.pefa.org/" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">PEFA</span><span class="ds-full">Public Expenditure and Financial Accountability</span></a><span class="ds-by"><span lang="en">International partnership</span><span lang="fr">Partenariat international</span></span></td>
-<td><span lang="en">Expert assessment based on government financial reports, laws and procedures</span><span lang="fr">Évaluation d'experts fondée sur les rapports financiers, les lois et les procédures de l'administration</span></td>
-<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span></td>
-<td><span lang="en">On request, often every 3–5 years</span><span lang="fr">Sur demande, souvent tous les 3 à 5 ans</span></td>
+<td><a href="https://www.pefa.org/" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">PEFA</span><span class="ds-full">Public Expenditure and Financial Accountability</span></a><span class="ds-by"><span lang="en">International partnership</span><span lang="fr">Partenariat international</span><span lang="es">Alianza internacional</span></span></td>
+<td><span lang="en">Expert assessment based on government financial reports, laws and procedures</span><span lang="fr">Évaluation d'experts fondée sur les rapports financiers, les lois et les procédures de l'administration</span><span lang="es">Evaluación de expertos basada en los informes financieros, las leyes y los procedimientos del gobierno</span></td>
+<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span><span lang="es">Gobiernos nacionales</span></td>
+<td><span lang="en">On request, often every 3–5 years</span><span lang="fr">Sur demande, souvent tous les 3 à 5 ans</span><span lang="es">A solicitud, a menudo cada 3–5 años</span></td>
 <td><ul>
-<li><span lang="en">Budget reliability</span><span lang="fr">Fiabilité du budget</span></li>
-<li><span lang="en">Transparency of public finances</span><span lang="fr">Transparence des finances publiques</span></li>
-<li><span lang="en">Assets and liabilities</span><span lang="fr">Actifs et passifs</span></li>
-<li><span lang="en">Policy-based budgeting</span><span lang="fr">Budgétisation fondée sur les politiques</span></li>
-<li><span lang="en">Control in budget execution</span><span lang="fr">Contrôle de l'exécution du budget</span></li>
-<li><span lang="en">Accounting and reporting</span><span lang="fr">Comptabilité et rapports</span></li>
-<li><span lang="en">External scrutiny and audit</span><span lang="fr">Contrôle et audit externes</span></li>
+<li><span lang="en">Budget reliability</span><span lang="fr">Fiabilité du budget</span><span lang="es">Confiabilidad del presupuesto</span></li>
+<li><span lang="en">Transparency of public finances</span><span lang="fr">Transparence des finances publiques</span><span lang="es">Transparencia de las finanzas públicas</span></li>
+<li><span lang="en">Assets and liabilities</span><span lang="fr">Actifs et passifs</span><span lang="es">Gestión de activos y pasivos</span></li>
+<li><span lang="en">Policy-based budgeting</span><span lang="fr">Budgétisation fondée sur les politiques</span><span lang="es">Estrategia fiscal y presupuestación basadas en políticas</span></li>
+<li><span lang="en">Control in budget execution</span><span lang="fr">Contrôle de l'exécution du budget</span><span lang="es">Previsibilidad y control de la ejecución presupuestaria</span></li>
+<li><span lang="en">Accounting and reporting</span><span lang="fr">Comptabilité et rapports</span><span lang="es">Contabilidad y presentación de informes</span></li>
+<li><span lang="en">External scrutiny and audit</span><span lang="fr">Contrôle et audit externes</span><span lang="es">Escrutinio y auditoría externos</span></li>
 </ul></td>
-<td class="num"><span lang="en">150+ countries</span><span lang="fr">Plus de 150 pays</span></td>
+<td class="num"><span lang="en">150+ countries</span><span lang="fr">Plus de 150 pays</span><span lang="es">Más de 150 países</span></td>
 </tr>
 <tr class="even">
 <td><a href="https://www.globalsurveyofpublicservants.org/" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">GSPS</span><span class="ds-full">Global Survey of Public Servants</span></a><span class="ds-by">Consortium</span></td>
-<td><span lang="en">Surveys of individual public servants</span><span lang="fr">Enquêtes auprès des agents publics</span></td>
-<td><span lang="en">National governments; organizations and units within them</span><span lang="fr">Administrations nationales ; leurs organismes et services</span></td>
-<td><span lang="en">Every few years, as country surveys allow</span><span lang="fr">Tous les quelques ans, selon les enquêtes nationales</span></td>
+<td><span lang="en">Surveys of individual public servants</span><span lang="fr">Enquêtes auprès des agents publics</span><span lang="es">Encuestas a servidores públicos individuales</span></td>
+<td><span lang="en">National governments; organizations and units within them</span><span lang="fr">Administrations nationales ; leurs organismes et services</span><span lang="es">Gobiernos nacionales; organizaciones y unidades dentro de ellos</span></td>
+<td><span lang="en">Every few years, as country surveys allow</span><span lang="fr">Tous les quelques ans, selon les enquêtes nationales</span><span lang="es">Cada pocos años, según lo permitan las encuestas de cada país</span></td>
 <td><ul>
-<li><span lang="en">Attitudes at work</span><span lang="fr">Attitudes au travail</span></li>
-<li><span lang="en">Motivation and engagement</span><span lang="fr">Motivation et engagement</span></li>
+<li><span lang="en">Attitudes at work</span><span lang="fr">Attitudes au travail</span><span lang="es">Actitudes en el trabajo</span></li>
+<li><span lang="en">Motivation and engagement</span><span lang="fr">Motivation et engagement</span><span lang="es">Motivación y compromiso</span></li>
 <li>Leadership</li>
-<li><span lang="en">Recruitment</span><span lang="fr">Recrutement</span></li>
+<li><span lang="en">Recruitment</span><span lang="fr">Recrutement</span><span lang="es">Reclutamiento</span></li>
 <li>Promotion</li>
-<li><span lang="en">Turnover intentions</span><span lang="fr">Intentions de départ</span></li>
+<li><span lang="en">Turnover intentions</span><span lang="fr">Intentions de départ</span><span lang="es">Intención de dejar el puesto</span></li>
 </ul></td>
-<td class="num"><span lang="en">29 countries</span><span lang="fr">29 pays</span></td>
+<td class="num"><span lang="en">29 countries</span><span lang="fr">29 pays</span><span lang="es">29 países</span></td>
 </tr>
 <tr class="odd">
-<td><a href="https://www.sigmaweb.org/" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">SIGMA</span><span class="ds-full">Principles of Public Administration</span></a><span class="ds-by"><span lang="en">OECD</span><span lang="fr">OCDE</span></span></td>
-<td><span lang="en">Document reviews, administrative data, interviews, surveys of experts, officials and citizens, field visits</span><span lang="fr">Examens de documents, données administratives, entretiens, enquêtes auprès d'experts, de fonctionnaires et de citoyens, visites sur le terrain</span></td>
-<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span></td>
-<td><span lang="en">Varies</span><span lang="fr">Variable</span></td>
+<td><a href="https://www.sigmaweb.org/" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">SIGMA</span><span class="ds-full">Principles of Public Administration</span></a><span class="ds-by"><span lang="en">OECD</span><span lang="fr">OCDE</span><span lang="es">OCDE</span></span></td>
+<td><span lang="en">Document reviews, administrative data, interviews, surveys of experts, officials and citizens, field visits</span><span lang="fr">Examens de documents, données administratives, entretiens, enquêtes auprès d'experts, de fonctionnaires et de citoyens, visites sur le terrain</span><span lang="es">Revisiones documentales, datos administrativos, entrevistas, encuestas a expertos, funcionarios y ciudadanos, visitas sobre el terreno</span></td>
+<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span><span lang="es">Gobiernos nacionales</span></td>
+<td><span lang="en">Varies</span><span lang="fr">Variable</span><span lang="es">Variable</span></td>
 <td><ul>
-<li><span lang="en">Strategy</span><span lang="fr">Stratégie</span></li>
-<li><span lang="en">Policy development and coordination</span><span lang="fr">Élaboration et coordination des politiques</span></li>
-<li><span lang="en">Organization, accountability and oversight</span><span lang="fr">Organisation, redevabilité et contrôle</span></li>
-<li><span lang="en">Service delivery and digitalization</span><span lang="fr">Prestation de services et numérisation</span></li>
-<li><span lang="en">Public financial management</span><span lang="fr">Gestion des finances publiques</span></li>
-<li><span lang="en">Public service and HRM</span><span lang="fr">Fonction publique et GRH</span></li>
+<li><span lang="en">Strategy</span><span lang="fr">Stratégie</span><span lang="es">Estrategia</span></li>
+<li><span lang="en">Policy development and coordination</span><span lang="fr">Élaboration et coordination des politiques</span><span lang="es">Formulación y coordinación de políticas</span></li>
+<li><span lang="en">Organization, accountability and oversight</span><span lang="fr">Organisation, redevabilité et contrôle</span><span lang="es">Organización, rendición de cuentas y supervisión</span></li>
+<li><span lang="en">Service delivery and digitalization</span><span lang="fr">Prestation de services et numérisation</span><span lang="es">Prestación de servicios y digitalización</span></li>
+<li><span lang="en">Public financial management</span><span lang="fr">Gestion des finances publiques</span><span lang="es">Gestión de las finanzas públicas</span></li>
+<li><span lang="en">Public service and HRM</span><span lang="fr">Fonction publique et GRH</span><span lang="es">Servicio público y GRH</span></li>
 </ul></td>
-<td class="num"><span lang="en">6 Western Balkan countries</span><span lang="fr">6 pays des Balkans occidentaux</span></td>
+<td class="num"><span lang="en">6 Western Balkan countries</span><span lang="fr">6 pays des Balkans occidentaux</span><span lang="es">6 países de los Balcanes Occidentales</span></td>
 </tr>
 <tr class="even">
 <td><a href="https://internationalbudget.org/open-budget-survey" class="ds-link" target="_blank" rel="noopener"><span class="ds-name">OBS</span><span class="ds-full">Open Budget Survey</span></a><span class="ds-by">International Budget Partnership</span></td>
-<td><span lang="en">Questionnaire filled in by independent budget experts in each country, reviewed by peers and the government</span><span lang="fr">Questionnaire rempli par des experts budgétaires indépendants dans chaque pays, revu par des pairs et par le gouvernement</span></td>
-<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span></td>
-<td><span lang="en">Every 2 years</span><span lang="fr">Tous les 2 ans</span></td>
+<td><span lang="en">Questionnaire filled in by independent budget experts in each country, reviewed by peers and the government</span><span lang="fr">Questionnaire rempli par des experts budgétaires indépendants dans chaque pays, revu par des pairs et par le gouvernement</span><span lang="es">Cuestionario completado por expertos presupuestarios independientes en cada país, revisado por pares y por el gobierno</span></td>
+<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span><span lang="es">Gobiernos nacionales</span></td>
+<td><span lang="en">Every 2 years</span><span lang="fr">Tous les 2 ans</span><span lang="es">Cada 2 años</span></td>
 <td><ul>
-<li><span lang="en">Budget transparency at every stage</span><span lang="fr">Transparence budgétaire à chaque étape</span></li>
-<li><span lang="en">Public participation</span><span lang="fr">Participation du public</span></li>
-<li><span lang="en">Legislative and audit oversight</span><span lang="fr">Contrôle parlementaire et contrôle des comptes</span></li>
+<li><span lang="en">Budget transparency at every stage</span><span lang="fr">Transparence budgétaire à chaque étape</span><span lang="es">Transparencia presupuestaria en cada etapa</span></li>
+<li><span lang="en">Public participation</span><span lang="fr">Participation du public</span><span lang="es">Participación pública</span></li>
+<li><span lang="en">Legislative and audit oversight</span><span lang="fr">Contrôle parlementaire et contrôle des comptes</span><span lang="es">Supervisión legislativa y de auditoría</span></li>
 </ul></td>
-<td class="num"><span lang="en">125+ countries</span><span lang="fr">Plus de 125 pays</span></td>
+<td class="num"><span lang="en">125+ countries</span><span lang="fr">Plus de 125 pays</span><span lang="es">Más de 125 países</span></td>
 </tr>
 <tr class="odd">
-<td><a href="https://www.oecd-ilibrary.org/en/data/datasets/public-finance-and-budgets-database.html" class="ds-link" target="_blank" rel="noopener"><span class="ds-name"><span lang="en">OECD BPS</span><span lang="fr">OCDE BPS</span></span><span class="ds-full">Budget Practices and Procedures Survey</span></a><span class="ds-by"><span lang="en">OECD</span><span lang="fr">OCDE</span></span></td>
-<td><span lang="en">Questionnaire sent to budget officials (central budget authority or finance ministry)</span><span lang="fr">Questionnaire adressé aux responsables budgétaires (autorité budgétaire centrale ou ministère des Finances)</span></td>
-<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span></td>
-<td><span lang="en">Every 5 years</span><span lang="fr">Tous les 5 ans</span></td>
+<td><a href="https://www.oecd-ilibrary.org/en/data/datasets/public-finance-and-budgets-database.html" class="ds-link" target="_blank" rel="noopener"><span class="ds-name"><span lang="en">OECD BPS</span><span lang="fr">OCDE BPS</span><span lang="es">OCDE BPS</span></span><span class="ds-full">Budget Practices and Procedures Survey</span></a><span class="ds-by"><span lang="en">OECD</span><span lang="fr">OCDE</span><span lang="es">OCDE</span></span></td>
+<td><span lang="en">Questionnaire sent to budget officials (central budget authority or finance ministry)</span><span lang="fr">Questionnaire adressé aux responsables budgétaires (autorité budgétaire centrale ou ministère des Finances)</span><span lang="es">Cuestionario enviado a los funcionarios de presupuesto (autoridad presupuestaria central o ministerio de finanzas)</span></td>
+<td><span lang="en">National governments</span><span lang="fr">Administrations nationales</span><span lang="es">Gobiernos nacionales</span></td>
+<td><span lang="en">Every 5 years</span><span lang="fr">Tous les 5 ans</span><span lang="es">Cada 5 años</span></td>
 <td><ul>
-<li><span lang="en">Budget formulation</span><span lang="fr">Élaboration du budget</span></li>
-<li><span lang="en">Legislative approval and oversight</span><span lang="fr">Adoption et contrôle parlementaires</span></li>
-<li><span lang="en">Execution and control</span><span lang="fr">Exécution et contrôle</span></li>
-<li><span lang="en">Fiscal transparency</span><span lang="fr">Transparence budgétaire</span></li>
-<li><span lang="en">Performance and results</span><span lang="fr">Performance et résultats</span></li>
-<li><span lang="en">Capital budgeting and fiscal risks</span><span lang="fr">Budgétisation des investissements et risques budgétaires</span></li>
+<li><span lang="en">Budget formulation</span><span lang="fr">Élaboration du budget</span><span lang="es">Formulación del presupuesto</span></li>
+<li><span lang="en">Legislative approval and oversight</span><span lang="fr">Adoption et contrôle parlementaires</span><span lang="es">Aprobación y supervisión legislativas</span></li>
+<li><span lang="en">Execution and control</span><span lang="fr">Exécution et contrôle</span><span lang="es">Ejecución y control</span></li>
+<li><span lang="en">Fiscal transparency</span><span lang="fr">Transparence budgétaire</span><span lang="es">Transparencia fiscal</span></li>
+<li><span lang="en">Performance and results</span><span lang="fr">Performance et résultats</span><span lang="es">Desempeño y resultados</span></li>
+<li><span lang="en">Capital budgeting and fiscal risks</span><span lang="fr">Budgétisation des investissements et risques budgétaires</span><span lang="es">Presupuestación de capital y riesgos fiscales</span></li>
 </ul></td>
-<td><span lang="en">OECD countries, sometimes partners</span><span lang="fr">Pays de l'OCDE, parfois des partenaires</span></td>
+<td><span lang="en">OECD countries, sometimes partners</span><span lang="fr">Pays de l'OCDE, parfois des partenaires</span><span lang="es">Países de la OCDE, a veces socios</span></td>
 </tr>
 </tbody>
 </table>
 
     </div>
     <p class="note" lang="en">Sources: the datasets' own documentation, as summarized in the <a href="assets/docs/PIC_Indicators_LLMSS_paper_draft.pdf" target="_blank" rel="noopener">PIC working paper (LLMSS 2026)</a>, Table 1.</p>
-    <p class="note" lang="fr">Sources : la documentation des jeux de données, telle que résumée dans le <a href="assets/docs/PIC_Indicators_LLMSS_paper_draft.pdf" target="_blank" rel="noopener">document de travail PIC (LLMSS 2026)</a>, tableau 1.</p>
+    <p class="note" lang="fr">Sources : la documentation des jeux de données, telle que résumée dans le <a href="assets/docs/PIC_Indicators_LLMSS_paper_draft.pdf" target="_blank" rel="noopener">document de travail PIC (LLMSS 2026)</a>, tableau 1.</p><p class="note" lang="es">Fuentes: la documentación propia de cada conjunto de datos, resumida en el <a href="assets/docs/PIC_Indicators_LLMSS_paper_draft.pdf" target="_blank" rel="noopener">documento de trabajo de PIC (LLMSS 2026)</a>, cuadro 1.</p>
   </section>
 
   <section class="home-section" id="downloads">
-    <h2><span lang="en">Downloads</span><span lang="fr">Téléchargements</span></h2>
+    <h2><span lang="en">Downloads</span><span lang="fr">Téléchargements</span><span lang="es">Descargas</span></h2>
     <p class="note in-frame-only" lang="en">Downloads are not available in this preview; they work on the published site.</p>
-    <p class="note in-frame-only" lang="fr">Les téléchargements ne sont pas disponibles dans cet aperçu ; ils fonctionnent sur le site publié.</p>
+    <p class="note in-frame-only" lang="fr">Les téléchargements ne sont pas disponibles dans cet aperçu ; ils fonctionnent sur le site publié.</p><p class="note in-frame-only" lang="es">Las descargas no están disponibles en esta vista previa; funcionan en el sitio publicado.</p>
     <div class="dl-grid">
       <div>
-        <h3><span lang="en">Questionnaires</span><span lang="fr">Questionnaires</span></h3>
+        <h3><span lang="en">Questionnaires</span><span lang="fr">Questionnaires</span><span lang="es">Cuestionarios</span></h3>
         <p class="dl-sub" lang="en">The two questionnaires, as used in the pilot (Excel files in English, French and Lao).</p>
-        <p class="dl-sub" lang="fr">Les deux questionnaires, tels qu'utilisés pendant le pilote (fichiers Excel en anglais, français et lao).</p>
+        <p class="dl-sub" lang="fr">Les deux questionnaires, tels qu'utilisés pendant le pilote (fichiers Excel en anglais, français et lao).</p><p class="dl-sub" lang="es">Los dos cuestionarios, tal como se usaron en el piloto (archivos Excel en inglés, francés y lao).</p>
         <ul class="dl-list" id="dl-q"></ul>
       </div>
       <div>
-        <div class="dl-head"><h3><span lang="en">Answers by country</span><span lang="fr">Réponses par pays</span></h3><div id="dl-sector"></div></div>
+        <div class="dl-head"><h3><span lang="en">Answers by country</span><span lang="fr">Réponses par pays</span><span lang="es">Respuestas por país</span></h3><div id="dl-sector"></div></div>
         <p class="dl-sub" lang="en">Excel files with all questionnaire items as answered by the AI data-collection pipeline, including each answer's grade, supporting quote, sources and the rationale for the choice.</p>
-        <p class="dl-sub" lang="fr">Fichiers Excel présentant toutes les questions telles que remplies par le pipeline de collecte de données par IA, avec la note de chaque réponse, la citation qui l'étaye, les sources et la justification du choix.</p>
+        <p class="dl-sub" lang="fr">Fichiers Excel présentant toutes les questions telles que remplies par le pipeline de collecte de données par IA, avec la note de chaque réponse, la citation qui l'étaye, les sources et la justification du choix.</p><p class="dl-sub" lang="es">Archivos Excel con todas las preguntas del cuestionario tal como las respondió el pipeline de recopilación de datos con IA, incluidas la calificación de cada respuesta, la cita que la respalda, las fuentes y la justificación de la elección.</p>
         <ul class="dl-countries" id="dl-c"></ul>
       </div>
     </div>
@@ -525,8 +525,8 @@ ul.task-list li input[type="checkbox"] {
       <img class="lg-wb" data-logo="" src="assets/img/wb-logo.png" alt="World Bank Group Institutions">
       <div class="partners-text">
         <p lang="en">The PIC Indicators are the work of the Institutional Capacity and Effectiveness unit (WKPGI), Global Governance, World Bank Group. The answers shown here are pilot results from an AI pipeline and are being reviewed by people; they are not official statistics.</p>
-        <p lang="fr">Les indicateurs PIC sont le travail de l'unité Capacité et efficacité institutionnelles (WKPGI), Gouvernance mondiale, Groupe de la Banque mondiale. Les réponses présentées ici sont des résultats pilotes d'un pipeline d'IA, en cours d'examen par des personnes ; ce ne sont pas des statistiques officielles.</p>
-        <p class="contact"><b><span lang="en">Contact the team:</span><span lang="fr">Contacter l'équipe :</span></b> <a href="mailto:rramalho@worldbankgroup.org">rramalho@worldbankgroup.org</a> <span lang="en">(Task Team Leader)</span><span lang="fr">(cheffe d'équipe de projet)</span> <span lang="en">and</span><span lang="fr">et</span> <a href="mailto:rlipinski@worldbank.org">rlipinski@worldbank.org</a> <span lang="en">(Extended Term Consultant)</span><span lang="fr">(consultant à durée prolongée)</span></p>
+        <p lang="fr">Les indicateurs PIC sont le travail de l'unité Capacité et efficacité institutionnelles (WKPGI), Gouvernance mondiale, Groupe de la Banque mondiale. Les réponses présentées ici sont des résultats pilotes d'un pipeline d'IA, en cours d'examen par des personnes ; ce ne sont pas des statistiques officielles.</p><p lang="es">Los Indicadores PIC son obra de la unidad de Capacidad y Eficacia Institucional (WKPGI), Gobernanza Global, Grupo Banco Mundial. Las respuestas que se muestran aquí son resultados piloto de un pipeline de IA y están siendo revisadas por personas; no son estadísticas oficiales.</p>
+        <p class="contact"><b><span lang="en">Contact the team:</span><span lang="fr">Contacter l'équipe :</span><span lang="es">Contacto con el equipo:</span></b> <a href="mailto:rramalho@worldbankgroup.org">rramalho@worldbankgroup.org</a> <span lang="en">(Task Team Leader)</span><span lang="fr">(cheffe d'équipe de projet)</span><span lang="es">(jefa del equipo del proyecto)</span> <span lang="en">and</span><span lang="fr">et</span><span lang="es">y</span> <a href="mailto:rlipinski@worldbank.org">rlipinski@worldbank.org</a> <span lang="en">(Extended Term Consultant)</span><span lang="fr">(consultant à durée prolongée)</span><span lang="es">(consultor de plazo extendido)</span></p>
       </div>
     </div>
   </section>

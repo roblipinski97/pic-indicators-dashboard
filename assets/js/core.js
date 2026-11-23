@@ -1,7 +1,7 @@
 // Shared code for every page: data loading, colours, flags, tooltips, URL state and small controls.
 import * as d3 from "./vendor/d3.bundle.js";
-import { t, tx, isFr, lang } from "./i18n.js";
-export { d3, t, tx, isFr, lang };
+import { t, tx, isFr, isEs, lang } from "./i18n.js";
+export { d3, t, tx, isFr, isEs, lang };
 
 // site root (this file lives in assets/js/), so pages work in any sub-folder on a server
 export const ROOT = new URL("../../", import.meta.url).href;
@@ -22,20 +22,22 @@ export function getJSON(path) {
 export async function loadMeta() {
   const m = await getJSON("data/meta.json");
   if (m._ready) return m;
-  // in French, the names and the questionnaire text are swapped for their French versions (the English stays in *_en);
-  // area and region names stay as keys and are translated where they are shown (t())
-  if (isFr()) {
-    m.countries.forEach(c => { c.name_en = c.name; c.name = c.name_fr || c.name; });
-    m.countries.sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  // in French or Spanish, the names and the questionnaire text are swapped for their French or Spanish versions (the
+  // English stays in *_en); area and region names stay as keys and are translated where they are shown (t())
+  const L = lang();
+  if (L !== "en") {
+    m.countries.forEach(c => { c.name_en = c.name; c.name = c[`name_${L}`] || c.name; });
+    m.countries.sort((a, b) => a.name.localeCompare(b.name, L));
     for (const s of ["HRM", "PFM"]) {
       const st = m.structure[s];
       st.sections.forEach(x => { x.label_en = x.label; x.label = t(x.label); x.pillar_en = x.pillar; x.pillar = t(x.pillar);
         x.subsections.forEach(u => { u.label_en = u.label; u.label = t(u.label); }); });
       st.questions.forEach(q => {
         q.text_en = q.text; q.item_en = q.item;
-        if (q.text_fr) q.text = q.text_fr;
-        if (q.item_fr) q.item = q.item_fr;
-        if (q.options_fr && q.options_fr.length === (q.options || []).length) q.options = q.options_fr;
+        if (q[`text_${L}`]) q.text = q[`text_${L}`];
+        if (q[`item_${L}`]) q.item = q[`item_${L}`];
+        const o = q[`options_${L}`];
+        if (o && o.length === (q.options || []).length) q.options = o;
       });
     }
   }
@@ -248,10 +250,10 @@ export function quoteMark(qf) {
 
 /* ---------------------------------------------------------------- formats */
 
-// numbers: "45%" and "1,234" in English, "45 %" and "1 234" in French (narrow no-break spaces)
-export const pct = (v, d = 0) => (v == null || isNaN(v) ? "–" : isFr() ? `${(v * 100).toFixed(d).replace(".", ",")}\u202F%` : `${(v * 100).toFixed(d)}%`);
+// numbers: "45%" and "1,234" in English, "45 %" and "1 234" in French and Spanish (narrow no-break spaces, decimal comma)
+export const pct = (v, d = 0) => (v == null || isNaN(v) ? "–" : lang() !== "en" ? `${(v * 100).toFixed(d).replace(".", ",")}\u202F%` : `${(v * 100).toFixed(d)}%`);
 const numEn = d3.format(","), numFr = d3.formatLocale({ decimal: ",", thousands: "\u202F", grouping: [3], currency: ["", "\u00A0€"] }).format(",");
-export const num = n => (isFr() ? numFr(n) : numEn(n));
+export const num = n => (lang() !== "en" ? numFr(n) : numEn(n));
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 // English words, translated: French uses the singular for 0 and 1
 export const plural = (n, one, many) => `${num(n)} ${(isFr() ? n <= 1 : n === 1) ? t(one) : t(many || one + "s")}`;

@@ -9,14 +9,17 @@
 
 const TILE = 1500;                 // the pattern repeats every TILE px down the page
 const LAYERS = [                   // far to near: how many lines per tile, line width, node size, opacity, drift
-  { n: 16, w: 0.8, r: 2.2, a: 0.24, k: 0.10 },
-  { n: 11, w: 1.3, r: 3.4, a: 0.32, k: 0.20 },
-  { n: 7,  w: 2.0, r: 5.0, a: 0.38, k: 0.34 }
+  { n: 16, w: 0.8, r: 2.2, a: 0.29, k: 0.10 },
+  { n: 11, w: 1.3, r: 3.4, a: 0.38, k: 0.20 },
+  { n: 7,  w: 2.0, r: 5.0, a: 0.45, k: 0.34 }
 ];
 const COLOURS = {                  // cyan and periwinkle, as in the image; lighter and fainter on the dark background
   light: { a: [110, 196, 228], b: [128, 150, 208], k: 1 },
-  dark:  { a: [74, 150, 196],  b: [104, 124, 190], k: 0.55 }
+  dark:  { a: [74, 150, 196],  b: [104, 124, 190], k: 0.6 }
 };
+const RIGHT = { n: 1.2 };          // a fifth more lines than the layers say, on the right
+const LEFT = { n: 1.7, a: 1.25 };  // on the left: more lines still (the margin is narrower), a quarter stronger, and they
+                                   // start close to the edge (between 6% and 32% of the width) so all of them show
 
 // a small seeded random generator, so the pattern is the same on every page and every visit
 function rng(seed) {
@@ -30,9 +33,9 @@ function makeLines(W, layer, li, left = false) {
   const R = rng(7919 * (li + 1) + Math.round(W / 50) + (left ? 104729 : 0));
   const s = 0.6 + 0.25 * li;       // nearer layers: longer runs
   const lines = [];
-  const n = left ? Math.round(layer.n * 0.8) : layer.n;
+  const n = Math.round(layer.n * (left ? LEFT.n : RIGHT.n));
   for (let i = 0; i < n; i++) {
-    let x = W * (0.32 + 0.5 * R()), y = TILE * R();
+    let x = W * (left ? 0.68 + 0.26 * R() : 0.32 + 0.5 * R()), y = TILE * R();
     const pts = [[x, y]], segs = 2 + Math.floor(R() * 3);
     for (let k = 0; k < segs; k++) {
       if (k % 2 === 0) x += (70 + 220 * R()) * s;                       // straight run
@@ -43,7 +46,8 @@ function makeLines(W, layer, li, left = false) {
     let len = 0; const cum = [0];
     for (let k = 1; k < pts.length; k++) { len += Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]); cum.push(len); }
     if (left) pts.forEach(p => { p[0] = W - p[0]; });
-    lines.push({ pts, cum, len, col: R() < 0.72 ? "a" : "b", phase: R() * 1000, pulse: li > 0 && R() < 0.8, end: R() < 0.85 });
+    lines.push({ pts, cum, len, col: R() < 0.72 ? "a" : "b", phase: R() * 1000, pulse: li > 0 && R() < 0.8, end: R() < 0.85,
+                 m: left ? LEFT.a : 1 });
   }
   return lines;
 }
@@ -84,10 +88,10 @@ export function circuitBackground() {
     const sy = still ? 0 : window.scrollY;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
-    // fade towards the middle: full strength at the left edge, gone by 30% of the width; nothing up to a third of the
-    // width; full strength again from about 85% of the width to the right edge
+    // fade towards the middle: full strength from the left edge to 9% of the width, gone by 30%; nothing up to a third
+    // of the width; full strength again from about 85% of the width to the right edge
     const fade = ctx.createLinearGradient(0, 0, W, 0);
-    fade.addColorStop(0, "rgba(0,0,0,1)"); fade.addColorStop(0.05, "rgba(0,0,0,1)"); fade.addColorStop(0.30, "rgba(0,0,0,0)");
+    fade.addColorStop(0, "rgba(0,0,0,1)"); fade.addColorStop(0.09, "rgba(0,0,0,1)"); fade.addColorStop(0.30, "rgba(0,0,0,0)");
     fade.addColorStop(0.32, "rgba(0,0,0,0)"); fade.addColorStop(0.85, "rgba(0,0,0,1)"); fade.addColorStop(1, "rgba(0,0,0,1)");
     LAYERS.forEach((L, li) => {
       const off = -((sy * L.k) % TILE);
@@ -97,19 +101,20 @@ export function circuitBackground() {
         if (dy > H + 200 || dy + TILE < -200) continue;
         layers[li].forEach(l => {
           ctx.lineWidth = L.w; ctx.lineJoin = "round"; ctx.lineCap = "round";
-          ctx.strokeStyle = rgba(l.col, L.a);
+          const A = L.a * l.m;
+          ctx.strokeStyle = rgba(l.col, A);
           ctx.beginPath();
           l.pts.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1] + dy) : ctx.moveTo(p[0], p[1] + dy)));
           ctx.stroke();
           // a small dot where the line starts, a larger one where it ends
           const s = l.pts[0], e = l.pts[l.pts.length - 1];
-          ctx.fillStyle = rgba(l.col, L.a * 0.9);
+          ctx.fillStyle = rgba(l.col, A * 0.9);
           ctx.beginPath(); ctx.arc(s[0], s[1] + dy, L.r * 0.55, 0, 2 * Math.PI); ctx.fill();
-          if (l.end) { ctx.fillStyle = rgba(l.col === "a" ? "b" : "a", L.a * 1.1); ctx.beginPath(); ctx.ellipse(e[0], e[1] + dy, L.r * 1.25, L.r, -0.35, 0, 2 * Math.PI); ctx.fill(); }
+          if (l.end) { ctx.fillStyle = rgba(l.col === "a" ? "b" : "a", Math.min(1, A * 1.1)); ctx.beginPath(); ctx.ellipse(e[0], e[1] + dy, L.r * 1.25, L.r, -0.35, 0, 2 * Math.PI); ctx.fill(); }
           // a dot that runs along the line as the page scrolls
           if (l.pulse && !still) {
             const cyc = l.len + 240, d = ((sy * (0.6 + L.k) + l.phase) % cyc + cyc) % cyc;
-            if (d <= l.len) { const p = pointAt(l, d); ctx.fillStyle = rgba("b", Math.min(1, L.a * 1.6)); ctx.beginPath(); ctx.arc(p[0], p[1] + dy, L.r * 0.7, 0, 2 * Math.PI); ctx.fill(); }
+            if (d <= l.len) { const p = pointAt(l, d); ctx.fillStyle = rgba("b", Math.min(1, A * 1.6)); ctx.beginPath(); ctx.arc(p[0], p[1] + dy, L.r * 0.7, 0, 2 * Math.PI); ctx.fill(); }
           }
         });
       }

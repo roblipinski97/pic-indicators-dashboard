@@ -31,7 +31,7 @@ const flag = L => `<img class="lang-flag" src="${ROOT}assets/flags/${L.flag}.svg
 // the menu, the page title and the attributes marked on the page, in French
 const NAV = { "index.html": "Home", "country.html": "Country profiles", "compare.html": "Compare countries", "ask.html": "Ask the data" };
 function translatePage() {
-  if (lang() !== "fr") return;
+  if (lang() === "en") return;
   document.querySelectorAll(".navbar .nav-link").forEach(a => {
     const page = (a.getAttribute("href") || "").split("/").pop().split("?")[0] || "index.html";
     const span = a.querySelector(".menu-text") || a;
@@ -64,7 +64,8 @@ function mount() {
     `<div class="pal-menu lang-menu">` +
       `<button type="button" class="pal-btn lang-btn" aria-haspopup="true" aria-expanded="false" title="${t("Language")}" aria-label="${t("Language")}: ${cur.name}">${flag(cur)}<span class="lbl">${cur.code}</span>${CHEV}</button>` +
       `<div class="pal-pop lang-pop" role="menu" hidden>` +
-        LANGS.map(L => `<button type="button" role="menuitemradio" data-l="${L.k}" aria-checked="${L.k === lang()}">${flag(L)}<b>${L.code}</b><span>${L.name}</span></button>`).join("") +
+        LANGS.map(L => `<button type="button" role="menuitemradio" data-l="${L.k}" aria-checked="${L.k === lang()}"${L.note ? ` title="${L.note}"` : ""}>${flag(L)}<b>${L.code}</b><span>${L.name}</span></button>`).join("") +
+        LANGS.filter(L => L.note).map(L => `<p class="lang-note">${L.note}</p>`).join("") +
       `</div>` +
     `</div>`;
   nav.appendChild(box);
@@ -152,7 +153,7 @@ document.addEventListener("click", ev => {
   if (u.origin !== location.origin || !/(\.html|\/)$/.test(u.pathname)) return;
   if (paletteKey() !== "blueorange") u.searchParams.set("palette", paletteKey()); else u.searchParams.delete("palette");
   if (themeKey() === "dark") u.searchParams.set("theme", "dark"); else u.searchParams.delete("theme");
-  if (lang() === "fr") u.searchParams.set("lang", "fr"); else u.searchParams.delete("lang");
+  if (lang() !== "en") u.searchParams.set("lang", lang()); else u.searchParams.delete("lang");
   a.setAttribute("href", u.href);
 }, true);
 

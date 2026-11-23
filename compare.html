@@ -33,7 +33,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-57254d94ebbe2dc345c060e7ec3c8d4b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-1c4dbd4f07cf220f8bc20a692e4821e9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "language": {
     "search-no-results-text": "No results",
@@ -78,10 +78,10 @@ ul.task-list li input[type="checkbox"] {
     t = q && q.get("theme");
     if (t !== "dark" && t !== "light") { try { t = localStorage.getItem("pic-theme"); } catch (e) {} }
     document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
-    // language: English unless French was chosen (?lang=fr, or remembered)
+    // language: English unless French or Spanish was chosen (?lang=fr / ?lang=es, or remembered)
     var l = q && q.get("lang");
-    if (l !== "fr" && l !== "en") { try { l = localStorage.getItem("pic-lang"); } catch (e) {} }
-    if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.setAttribute("lang", "fr"); }
+    if (l !== "fr" && l !== "en" && l !== "es") { try { l = localStorage.getItem("pic-lang"); } catch (e) {} }
+    if (l === "fr" || l === "es") { document.documentElement.dataset.lang = l; document.documentElement.setAttribute("lang", l); }
     // inside a frame (e.g. a claude.ai artifact) downloads are usually blocked: hide those buttons
     var framed = true;
     try { framed = window.self !== window.top; } catch (e) {}
@@ -161,16 +161,16 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="pic-page">
   <div class="pic-intro">
-    <h1><span lang="en">Compare countries</span><span lang="fr">Comparer les pays</span></h1>
+    <h1><span lang="en">Compare countries</span><span lang="fr">Comparer les pays</span><span lang="es">Comparar países</span></h1>
     <p lang="en">Every country's answers side by side, the distribution of scores in each area, and where the answer is "I don't know".</p>
-    <p lang="fr">Les réponses de tous les pays côte à côte, la distribution des scores dans chaque domaine, et les réponses « Je ne sais pas ».</p>
+    <p lang="fr">Les réponses de tous les pays côte à côte, la distribution des scores dans chaque domaine, et les réponses « Je ne sais pas ».</p><p lang="es">Las respuestas de todos los países una al lado de otra, la distribución de los puntajes en cada área y dónde la respuesta es «No sé».</p>
   </div>
 
   <div class="toolbar">
-    <div class="field"><label for="year"><span lang="en">Year of the run</span><span lang="fr">Année de collecte</span></label><select id="year"></select></div>
-    <div class="field"><label><span lang="en">Questionnaire</span><span lang="fr">Questionnaire</span></label><div id="sector" class="seg-lg"></div></div>
-    <div class="field"><label for="region"><span lang="en">World Bank region</span><span lang="fr">Région de la Banque mondiale</span></label><select id="region" class="w-region"></select></div>
-    <div class="field"><label><span lang="en">Order countries by</span><span lang="fr">Trier les pays par</span></label><div id="order"></div></div>
+    <div class="field"><label for="year"><span lang="en">Year of the run</span><span lang="fr">Année de collecte</span><span lang="es">Año de la ejecución</span></label><select id="year"></select></div>
+    <div class="field"><label><span lang="en">Questionnaire</span><span lang="fr">Questionnaire</span><span lang="es">Cuestionario</span></label><div id="sector" class="seg-lg"></div></div>
+    <div class="field"><label for="region"><span lang="en">World Bank region</span><span lang="fr">Région de la Banque mondiale</span><span lang="es">Región del Banco Mundial</span></label><select id="region" class="w-region"></select></div>
+    <div class="field"><label><span lang="en">Order countries by</span><span lang="fr">Trier les pays par</span><span lang="es">Ordenar los países por</span></label><div id="order"></div></div>
   </div>
 
   <div class="panel panel-main">
@@ -179,9 +179,9 @@ ul.task-list li input[type="checkbox"] {
     <div id="view-grid">
       <div class="panel-head">
         <div>
-          <p class="panel-sub" id="grid-sub"><span lang="en">Each column is a country, each dot an answer: point at a dot for the answer's quote, source and rationale, and click it to keep them open. Section and subsection rows show the average score of their questions; click them to open.</span><span lang="fr">Chaque colonne est un pays, chaque point une réponse : pointez un point pour voir la citation, la source et la justification de la réponse, et cliquez dessus pour les garder ouvertes. Les lignes de section et de sous-section montrent le score moyen de leurs questions ; cliquez dessus pour les ouvrir.</span></p>
+          <p class="panel-sub" id="grid-sub"><span lang="en">Each column is a country, each dot an answer: point at a dot for the answer's quote, source and rationale, and click it to keep them open. The top row gives each country's score across all areas. Section and subsection rows show the average score of their questions; click them to open.</span><span lang="fr">Chaque colonne est un pays, chaque point une réponse : pointez un point pour voir la citation, la source et la justification de la réponse, et cliquez dessus pour les garder ouvertes. La première ligne donne le score de chaque pays sur l'ensemble des domaines. Les lignes de section et de sous-section montrent le score moyen de leurs questions ; cliquez dessus pour les ouvrir.</span><span lang="es">Cada columna es un país y cada punto una respuesta: señale un punto para ver la cita, la fuente y la justificación de la respuesta, y haga clic para mantenerlas abiertas. La primera fila da el puntaje de cada país en todas las áreas. Las filas de sección y subsección muestran el puntaje promedio de sus preguntas; haga clic en ellas para abrirlas.</span></p>
         </div>
-        <div class="panel-tools"><button type="button" class="btn-quiet" id="g-open"><span lang="en">Open all</span><span lang="fr">Tout ouvrir</span></button><button type="button" class="btn-quiet" id="g-close"><span lang="en">Close all</span><span lang="fr">Tout fermer</span></button></div>
+        <div class="panel-tools"><button type="button" class="btn-quiet" id="g-open"><span lang="en">Open all</span><span lang="fr">Tout ouvrir</span><span lang="es">Abrir todo</span></button><button type="button" class="btn-quiet" id="g-close"><span lang="en">Close all</span><span lang="fr">Tout fermer</span><span lang="es">Cerrar todo</span></button></div>
       </div>
       <div class="legend" id="grid-legend"></div>
       <div class="grid-wrap" id="grid"></div>
@@ -198,6 +198,17 @@ ul.task-list li input[type="checkbox"] {
       <div class="legend" id="dist-legend"></div>
       <div class="chart" id="dist"></div>
       <p class="note" id="dist-note"></p>
+    </div>
+
+    <div id="view-lp" hidden="">
+      <div class="panel-head">
+        <div>
+          <p class="panel-sub" id="lp-sub"></p>
+        </div>
+      </div>
+      <div class="legend" id="lp-legend"></div>
+      <div class="chart" id="lpchart"></div>
+      <p class="note" id="lp-note"></p>
     </div>
 
     <div id="view-missing" hidden="">

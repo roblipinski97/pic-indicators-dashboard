@@ -33,7 +33,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-57254d94ebbe2dc345c060e7ec3c8d4b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-1c4dbd4f07cf220f8bc20a692e4821e9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "language": {
     "search-no-results-text": "No results",
@@ -78,10 +78,10 @@ ul.task-list li input[type="checkbox"] {
     t = q && q.get("theme");
     if (t !== "dark" && t !== "light") { try { t = localStorage.getItem("pic-theme"); } catch (e) {} }
     document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
-    // language: English unless French was chosen (?lang=fr, or remembered)
+    // language: English unless French or Spanish was chosen (?lang=fr / ?lang=es, or remembered)
     var l = q && q.get("lang");
-    if (l !== "fr" && l !== "en") { try { l = localStorage.getItem("pic-lang"); } catch (e) {} }
-    if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.setAttribute("lang", "fr"); }
+    if (l !== "fr" && l !== "en" && l !== "es") { try { l = localStorage.getItem("pic-lang"); } catch (e) {} }
+    if (l === "fr" || l === "es") { document.documentElement.dataset.lang = l; document.documentElement.setAttribute("lang", l); }
     // inside a frame (e.g. a claude.ai artifact) downloads are usually blocked: hide those buttons
     var framed = true;
     try { framed = window.self !== window.top; } catch (e) {}
@@ -161,16 +161,16 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="pic-page">
   <div class="pic-intro no-print">
-    <h1><span lang="en">Country profiles</span><span lang="fr">Profils de pays</span></h1>
+    <h1><span lang="en">Country profiles</span><span lang="fr">Profils de pays</span><span lang="es">Perfiles de país</span></h1>
     <p lang="en">Every answer for one country, section by section, with the document it rests on, the quoted passage, the grade of its evidence and the rationale.</p>
-    <p lang="fr">Toutes les réponses d'un pays, section par section, avec le document sur lequel chacune repose, le passage cité, la note de ses preuves et la justification.</p>
+    <p lang="fr">Toutes les réponses d'un pays, section par section, avec le document sur lequel chacune repose, le passage cité, la note de ses preuves et la justification.</p><p lang="es">Todas las respuestas de un país, sección por sección, con el documento en que se basan, el pasaje citado, la calificación de su evidencia y la justificación.</p>
   </div>
 
   <div class="toolbar">
-    <div class="field"><label for="region"><span lang="en">World Bank region</span><span lang="fr">Région de la Banque mondiale</span></label><select id="region" class="w-region"></select></div>
-    <div class="field" style="min-width:240px"><label id="country-label"><span lang="en">Country</span><span lang="fr">Pays</span></label><div id="country"></div></div>
-    <div class="field"><label for="year"><span lang="en">Year of the run</span><span lang="fr">Année de collecte</span></label><select id="year"></select></div>
-    <div class="field"><label><span lang="en">Questionnaire</span><span lang="fr">Questionnaire</span></label><div id="sector" class="seg-lg"></div></div>
+    <div class="field"><label for="region"><span lang="en">World Bank region</span><span lang="fr">Région de la Banque mondiale</span><span lang="es">Región del Banco Mundial</span></label><select id="region" class="w-region"></select></div>
+    <div class="field" style="min-width:240px"><label id="country-label"><span lang="en">Country</span><span lang="fr">Pays</span><span lang="es">País</span></label><div id="country"></div></div>
+    <div class="field"><label for="year"><span lang="en">Year of the run</span><span lang="fr">Année de collecte</span><span lang="es">Año de la ejecución</span></label><select id="year"></select></div>
+    <div class="field"><label><span lang="en">Questionnaire</span><span lang="fr">Questionnaire</span><span lang="es">Cuestionario</span></label><div id="sector" class="seg-lg"></div></div>
   </div>
 
   <div class="panel panel-main">
@@ -185,7 +185,7 @@ ul.task-list li input[type="checkbox"] {
         <div class="chart" id="radar"></div>
       </div>
       <div>
-        <h3 class="sub-h"><span lang="en">Score by area</span><span lang="fr">Score par domaine</span></h3>
+        <h3 class="sub-h"><span lang="en">Score by area</span><span lang="fr">Score par domaine</span><span lang="es">Puntaje por área</span></h3>
         <table class="area-list" id="areas"></table>
         <p class="note" id="area-note"></p>
       </div>
@@ -195,16 +195,17 @@ ul.task-list li input[type="checkbox"] {
   <div class="panel" id="questions">
     <div class="panel-head">
       <div>
-        <h2><span lang="en">Answers question by question</span><span lang="fr">Réponses question par question</span></h2>
+        <h2><span lang="en">Answers question by question</span><span lang="fr">Réponses question par question</span><span lang="es">Respuestas pregunta por pregunta</span></h2>
         <p class="panel-sub" lang="en">Open a section to see its questions. Click a question, or "See more", for the quoted passage, the rationale and the options it could take.</p>
-        <p class="panel-sub" lang="fr">Ouvrez une section pour voir ses questions. Cliquez sur une question, ou sur « Voir plus », pour le passage cité, la justification et les options possibles.</p>
+        <p class="panel-sub" lang="fr">Ouvrez une section pour voir ses questions. Cliquez sur une question, ou sur « Voir plus », pour le passage cité, la justification et les options possibles.</p><p class="panel-sub" lang="es">Abra una sección para ver sus preguntas. Haga clic en una pregunta, o en «Ver más», para ver el pasaje citado, la justificación y las opciones posibles.</p>
       </div>
-      <div class="panel-tools no-print"><button type="button" class="btn-quiet" id="q-open"><span lang="en">Open all</span><span lang="fr">Tout ouvrir</span></button><button type="button" class="btn-quiet" id="q-close"><span lang="en">Close all</span><span lang="fr">Tout fermer</span></button></div>
+      <div class="panel-tools no-print"><button type="button" class="btn-quiet" id="q-open"><span lang="en">Open all</span><span lang="fr">Tout ouvrir</span><span lang="es">Abrir todo</span></button><button type="button" class="btn-quiet" id="q-close"><span lang="en">Close all</span><span lang="fr">Tout fermer</span><span lang="es">Cerrar todo</span></button></div>
     </div>
     <div class="q-bar no-print">
       <div class="q-scale" id="qscale"></div>
       <div class="q-omit" id="qomit"></div>
-      <input type="search" id="search" placeholder="Search questions and answers" aria-label="Search questions and answers" data-fr-placeholder="Chercher dans les questions et les réponses" data-fr-aria-label="Chercher dans les questions et les réponses">
+      <div class="q-omit q-omit-lp" id="qomitlp"></div>
+      <input type="search" id="search" placeholder="Search questions and answers" aria-label="Search questions and answers" data-fr-placeholder="Chercher dans les questions et les réponses" data-es-placeholder="Buscar en preguntas y respuestas" data-fr-aria-label="Chercher dans les questions et les réponses" data-es-aria-label="Buscar en preguntas y respuestas">
     </div>
     <div class="qtable" id="qtable"></div>
   </div>

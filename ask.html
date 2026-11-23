@@ -33,7 +33,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-57254d94ebbe2dc345c060e7ec3c8d4b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-1c4dbd4f07cf220f8bc20a692e4821e9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "language": {
     "search-no-results-text": "No results",
@@ -78,10 +78,10 @@ ul.task-list li input[type="checkbox"] {
     t = q && q.get("theme");
     if (t !== "dark" && t !== "light") { try { t = localStorage.getItem("pic-theme"); } catch (e) {} }
     document.documentElement.dataset.theme = t === "dark" ? "dark" : "light";
-    // language: English unless French was chosen (?lang=fr, or remembered)
+    // language: English unless French or Spanish was chosen (?lang=fr / ?lang=es, or remembered)
     var l = q && q.get("lang");
-    if (l !== "fr" && l !== "en") { try { l = localStorage.getItem("pic-lang"); } catch (e) {} }
-    if (l === "fr") { document.documentElement.dataset.lang = "fr"; document.documentElement.setAttribute("lang", "fr"); }
+    if (l !== "fr" && l !== "en" && l !== "es") { try { l = localStorage.getItem("pic-lang"); } catch (e) {} }
+    if (l === "fr" || l === "es") { document.documentElement.dataset.lang = l; document.documentElement.setAttribute("lang", l); }
     // inside a frame (e.g. a claude.ai artifact) downloads are usually blocked: hide those buttons
     var framed = true;
     try { framed = window.self !== window.top; } catch (e) {}
@@ -161,18 +161,18 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="pic-page ask-wrap">
   <div class="pic-intro">
-    <h1><span lang="en">Ask the data</span><span lang="fr">Interroger les données</span></h1>
+    <h1><span lang="en">Ask the data</span><span lang="fr">Interroger les données</span><span lang="es">Consultar los datos</span></h1>
     <p lang="en">Below, a user can type a question about countries, areas or single questions of the two questionnaires. Answers come straight from the data, with a chart and a link to the full view.</p>
-    <p lang="fr">Ci-dessous, l'utilisateur peut poser une question sur les pays, les domaines ou une question précise des deux questionnaires. Les réponses viennent directement des données, avec un graphique et un lien vers la vue complète.</p>
+    <p lang="fr">Ci-dessous, l'utilisateur peut poser une question sur les pays, les domaines ou une question précise des deux questionnaires. Les réponses viennent directement des données, avec un graphique et un lien vers la vue complète.</p><p lang="es">Abajo puede escribir una pregunta sobre los países, las áreas o preguntas concretas de los dos cuestionarios. Las respuestas salen directamente de los datos, con un gráfico y un enlace a la vista completa.</p>
   </div>
   <div class="chips" id="chips"></div>
   <div class="ask-log" id="log" aria-live="polite"></div>
   <form class="ask-form" id="form">
-    <input id="input" type="text" placeholder="For example: Where is recruitment strongest?" aria-label="Your question" autocomplete="off" data-fr-placeholder="Par exemple : où le recrutement est-il le plus fort ?" data-fr-aria-label="Votre question">
-    <button class="btn-solid" type="submit"><span lang="en">Ask</span><span lang="fr">Demander</span></button>
+    <input id="input" type="text" placeholder="For example: Where is recruitment strongest?" aria-label="Your question" autocomplete="off" data-fr-placeholder="Par exemple : où le recrutement est-il le plus fort ?" data-es-placeholder="Por ejemplo: ¿Dónde es más fuerte el reclutamiento?" data-fr-aria-label="Votre question" data-es-aria-label="Su pregunta">
+    <button class="btn-solid" type="submit"><span lang="en">Ask</span><span lang="fr">Demander</span><span lang="es">Preguntar</span></button>
   </form>
   <p class="note" lang="en">This works out the answer from the words you use: it knows the countries, the areas of the two questionnaires (such as recruitment, compensation, budget execution or IFMIS), de jure and de facto scores, "I don't know" answers and evidence grades, and it can find a single question by its words. It doesn't make up numbers.</p>
-  <p class="note" lang="fr">La réponse est déduite des mots que vous employez : l'outil connaît les pays, les domaines des deux questionnaires (comme le recrutement, la rémunération, l'exécution du budget ou le SIIGF), les scores de jure et de facto, les réponses « Je ne sais pas » et les notes des preuves, et il peut retrouver une question précise par ses mots. Il n'invente aucun chiffre.</p>
+  <p class="note" lang="fr">La réponse est déduite des mots que vous employez : l'outil connaît les pays, les domaines des deux questionnaires (comme le recrutement, la rémunération, l'exécution du budget ou le SIIGF), les scores de jure et de facto, les réponses « Je ne sais pas » et les notes des preuves, et il peut retrouver une question précise par ses mots. Il n'invente aucun chiffre.</p><p class="note" lang="es">Esta herramienta deduce la respuesta a partir de las palabras que usa: conoce los países, las áreas de los dos cuestionarios (como reclutamiento, compensación, ejecución presupuestaria o SIAF), los puntajes de jure y de facto, las respuestas «No sé» y las calificaciones de la evidencia, y puede encontrar una pregunta concreta por sus palabras. No inventa cifras.</p>
 </div>
 <script type="module" src="assets/js/pages/ask.js"></script>
 
