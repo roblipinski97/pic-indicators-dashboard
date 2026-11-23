@@ -226,6 +226,7 @@ export const FR = {
   "Grade {g}": "Note {g}",
   "Models' own suggestion (no document)": "Suggestion des modèles (sans document)",
   "Routing": "Filtrage",
+  "Not counted in the score: the form would skip this question, so the score counts it as unanswered (0 points).": "Non compté dans le score : le formulaire sauterait cette question, le score la compte donc comme sans réponse (0 point).",
   "Web chatbot's answer": "Réponse de l'assistant conversationnel en ligne",
   "The government's own answer": "Réponse du gouvernement",
   "Human reviewer's answer": "Réponse de l'examinateur",

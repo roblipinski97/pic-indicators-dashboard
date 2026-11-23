@@ -116,8 +116,8 @@ try {
         <td class="num">${pct(r.dj.score)}</td><td class="num">${pct(r.df.score)}</td><td class="num">${pct(r.all.idk)}</td></tr>`).join("")}
         <tr class="tot"><td><b>${t("All areas")}</b></td><td>${bar(tot)}</td><td class="num"><b>${pct(tot.score)}</b></td>
         <td class="num">${pct(sc("Total", "de jure").score)}</td><td class="num">${pct(sc("Total", "de facto").score)}</td><td class="num">${pct(tot.idk)}</td></tr></tbody>`;
-    $("area-note").textContent = tx(`Score: points earned as a share of the points possible on the questions answered. De jure and de facto: the same score on the questions about the law and about practice. I don't know: share of the area's points on questions answered "I don't know".`,
-      `Score : points obtenus en part des points possibles sur les questions avec réponse. De jure et de facto : le même score sur les questions portant sur le droit et sur la pratique. Je ne sais pas : part des points du domaine sur des questions avec « Je ne sais pas ».`) +
+    $("area-note").textContent = tx(`Score: points earned as a share of the points possible, leaving out the questions answered "I don't know". De jure and de facto: the same score on the questions about the law and about practice. I don't know: share of the area's points on questions answered "I don't know".`,
+      `Score : points obtenus en part des points possibles, sans les questions répondues « Je ne sais pas ». De jure et de facto : le même score sur les questions portant sur le droit et sur la pratique. Je ne sais pas : part des points du domaine sur des questions avec « Je ne sais pas ».`) +
       (isFr() ? " " + t("Answers, quotes and rationales are shown in the language of the source and of the pipeline (mostly English).") : "");
   }
 
@@ -223,7 +223,7 @@ try {
       [a && a.r ? block(t("Rationale"), `<p>${esc(a.r)}</p>`) : block(t("Why the answer is \"I don't know\""), a && a.iw ? `<p>${esc(a.iw)}</p>` : ""),
        block(a && a.g ? t("Grade {g}", { g: esc(a.g) }) : "", a && a.g ? `<p>${esc(GRADES[a.g] || "")}${a.why ? `<br><span class="muted">${esc(a.why)}</span>` : ""}</p>` : "")],
       [block(t("Models' own suggestion (no document)"), a && a.sug ? `<p>${esc(answerParts(a.sug, q).join("; "))}</p>` : ""),
-       block(t("Routing"), a && a.rel ? `<p>${esc(a.rel)}</p>` : "")],
+       block(t("Routing"), a && a.rel ? `<p>${esc(a.rel)}${a.nc ? `<br><span class="muted">${t("Not counted in the score: the form would skip this question, so the score counts it as unanswered (0 points).")}</span>` : ""}</p>` : "")],
       [block(t("Web chatbot's answer"), a && a.web ? `<p>${esc(answerParts(a.web, q).join("; "))}${a.wc ? ` <span class="muted">(${esc(wcText(a.wc))})</span>` : ""}</p>` : ""),
        block(gov ? t("The government's own answer") : t("Human reviewer's answer"), a && a.rev ? `<p>${esc(answerParts(a.rev, q).join("; "))}${a.ag ? ` <span class="muted">(${a.ag === "Yes" ? t("agrees with the AI") : t("differs from the AI")})</span>` : ""}${a.revn ? `<br><span class="muted">${esc(a.revn)}</span>` : ""}</p>` : "")]
     ].filter(r => r.some(c => c !== "<div></div>"));
